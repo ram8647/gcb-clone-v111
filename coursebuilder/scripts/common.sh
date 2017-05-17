@@ -105,7 +105,8 @@ function download_and_unpack() {
     sed -e 's/.*\.tar\.gz/tar.gz/' | \
     sed -e 's/.*\.tar/tar/' | \
     sed -e 's/.*\.bz2/bz2/' )
-  local temp_dir=$(mktemp -d)
+  local temp_dir=$(mktemp -d /tmp/tmp.XXXXXXXX)
+#  local temp_dir=$(mktemp -d)
   pushd $temp_dir > /dev/null
   curl --location --silent "$source_url" -o archive_file
   case $archive_type in
