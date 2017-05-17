@@ -1,0 +1,507 @@
+{% extends 'base_course.html' %}
+
+{% if alerts %}
+  <script>
+    $(function() {
+      cbShowAlert("{{ alerts | js_string }}");
+    });
+  </script>
+{% endif %}
+
+{% block subtitle %}
+  {# I18N: Title of the webpage. #}
+  - {{ gettext('Progress Details for {{ student_email }}') }}
+{% endblock subtitle %}
+
+{% block assets %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/student_progress.css" />
+  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css" /> 
+  <link rel="stylesheet" type="text/css" href="assets/lib/lessons/tipped.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+  <style> 
+  .complete{background-color: #ccffcc;} 
+  .inprogress{background-color: #ccddcc;} 
+  .notstarted{background-color: #ccaacc;} 
+  .issue{background-color: #ffaacc;} 
+  </style>
+  <style>
+  .tooltip {
+      position: relative;
+      display: inline-block;
+      border-bottom: 1px dotted black;
+  }
+
+  .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 120px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 0;
+
+      /* Position the tooltip */
+      position: absolute;
+      z-index: 1;
+      top: -5px;
+      right: 105%;
+  }
+
+  .tooltip:hover .tooltiptext {
+      visibility: visible;
+  }
+  </style>
+
+  <script type="text/javascript" src="/modules/teacher/resources/js/modal-window.js"></script>
+  <script src="assets/lib/lessons/tipped.js"></script>
+
+  <script>
+    // Script to initialize the page when ready
+    $(document).ready(function() {
+
+      // Setup hovers
+      Tipped.create('.help', function(element) {
+        var help = $(element).data('id');
+        return documentation[help];
+      }, {
+            cache: false,
+            position: 'topleft'
+         });
+
+      // Initilize the modal window -- is this used?
+      setUpModalWindow();
+    });
+  
+    var documentation = { 
+       "course-completion": "Displays the percentage of the course (units and lessons) completed by this student.",
+       "unit-completion": "When a unit is selected, displays the percentage of that unit completed by the student.",
+       "unitselect": "Select a unit to see the lessons within the unit. Then click on a lesson.",
+       "lesson-title": "Clicking on a lesson title will bring up the lesson in a separate tab.",
+       "progress": "Student progress on a lesson is either 'Completed', 'In progress' or 'Not started'. A lesson is completed when all the questions and exercises are completed correctly.",
+       "scores": "Correct answers over total questions. N/A means either the lesson has no questions or none were yet attempted. The eye-icon brings up student attempts and scores on questions in this lesson.",
+       "questions": "Hovering on the question title (e.g, Q1) will display a description of the question. The eye-icon brings up an interactive preview of the question.",
+    };
+  </script>
+
+  <script>
+     function hasClass(elem, className) {
+       return elem.className.split(' ').indexOf(className) > -1;
+     }
+
+    $(function() {
+      // Handles updating the lesson select options and completion values
+      // Invoked when the user selects a Unit
+      $('.unit-select').change(function() {
+        $('#questions-container').empty();
+
+        // Update the student table with data for the selected unit
+        var newOptions = [];
+        if (this.value == 'course_completion') {
+          document.getElementById('student-unit-completion').innerHTML = '<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>' + 'N/A';
+          document.getElementById('progress-unit-completion').value = 0;
+          document.getElementById('progress-unit-completion').width = 0;
+          document.getElementById('lessons-table-headings').style.visibility='hidden';  // Hide headings with hovers
+        } else {
+          document.getElementById('lessons-table-headings').style.visibility='visible'; // Display headings with hovers
+          document.getElementById('student-unit-completion').innerHTML = '<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>' 
+            + studentJs['progress_dict']['unit_completion'][this.value] + ' %';
+          document.getElementById('progress-unit-completion').value = studentJs['progress_dict']['unit_completion'][this.value] / 100;
+          document.getElementById('progress-unit-completion').width = studentJs['progress_dict']['unit_completion'][this.value] / 100;
+          var lessons = lessonsObject[this.value];
+          for (var i =0; i < lessons.length; i++) {
+            newOptions.push({
+              key: lessons[i].lesson_id,
+              value: lessons[i].title
+            });
+          }
+        }
+
+        // Display the unit's lessons in a table with clickable lesson titles
+        var lessons = lessonsObject[this.value];
+        var el = document.getElementById('lessons-container');
+        var table = document.getElementById('lessons-table');
+        while (table.firstChild) {
+            table.removeChild(table.firstChild);
+        }
+        for (var k = 0; k < lessons.length; k++) {
+           var lid = lessons[k]['lesson_id'];
+           var uid = lessons[k]['unit_id'];
+           row = table.insertRow(k);
+           cell = row.insertCell(0);
+           cell.style.width="25%";
+           cell.innerHTML="<a target='_blank' href='https://ram8647.appspot.com/mobileCSP/unit?unit=" + uid + "&lesson=" + lid + "'>" + lessons[k]['title']   + "</a>";
+           cell = row.insertCell(1);
+           cell.style.width="15%";
+           var progress = studentJs['progress_dict']['lessons_progress'][uid][lid];   // 0, 1, or 2
+           var progress_bar = progress / 2;
+           var innerHtml = ""
+           if (progress == 2) 
+             innerHtml = 'Completed';
+           else if (progress == 1)
+             innerHtml = 'In progress';
+           else
+             innerHtml = 'Not started';
+           var progressHTML = "<progress class=student-course-progress value=" + progress_bar + ">";
+           progressHTML += "<div class=progress-bar>";
+           progressHTML += "<span style=width:" + progress_bar + " ;></span></div></progress>";
+           cell.innerHTML = innerHtml + "<br>" + progressHTML; 
+           cell = row.insertCell(2);
+           cell.style.width="10%; color:blue;";
+           var score_ratio = get_lesson_progress(uid, lid);
+           var md_class_name = "zmdi zmdi-" + lid + " zmdi-eye";
+           cell.className = md_class_name;
+           cell.setAttribute('unit_id', uid);
+           cell.setAttribute('lesson_id', lid);
+           cell.innerHTML = "<div unit_id=" + uid + " lesson_id=" + lid + " id=lesson-completion-" + lid + " class='lesson-completion'>" + score_ratio + " </div>";
+           cell = row.insertCell(3);
+           cell.style.width="50%";
+           cell.innerHTML = "<table id=question-attempts-" + lid + " class='question-attempts'> </table>";
+        }
+
+        // Add click handlers to the titles -- hasClass is defined above
+        // The else clause handles a <span> inside a <div> that contains unit_id and lesson_id
+        document.addEventListener('click', function (e) {
+          if (hasClass(e.target, 'lesson-completion')) {
+            handle_lesson_selection(e.target.getAttribute('unit_id'), e.target.getAttribute('lesson_id'));
+         } else if (hasClass(e.target, 'zmdi-eye'))
+            if (e.target.hasAttribute('lesson_id')) {
+              handle_lesson_selection(e.target.getAttribute('unit_id'), e.target.getAttribute('lesson_id'));
+            }
+        }, false);
+      });
+    });
+  </script>
+{% endblock assets %}
+
+
+{% block top_content %}
+{% endblock %}
+
+{% block main_content %}
+{{ main_content }}
+
+{% if student_email %}
+  <script>
+  var student_email = '{{ student_email }}';
+  </script>
+{% endif %}
+
+{% if lessons %}
+  <script>
+  var lessonsJson = '{{ lessons|safe }}';
+  var lessonsObject = jQuery.parseJSON(lessonsJson);
+  </script>
+{% endif %}
+
+{% if student %}
+  <script>
+  var studentDict = '{{ studentJs | safe  }}'; 
+  var studentJs = jQuery.parseJSON(studentDict);
+  </script>
+{% endif %}
+
+
+{% if student_email  %}
+  <script>
+    /*
+     * Creates an array of [question_id, attempts, score, type, desc, quizlyname] for each
+     *  question in the questions array. Non-quizly questions have name = ''.  These
+     *  data are used to render and array of links and hovers that enable the user
+     *  to preview  each question, including Quizlys.
+     *
+     * @param questions a dict of questions for this lesson
+     * @param attempts an array of the number of student attempts at a question
+     * @return An array of the form [id, attempts, score, type, desc, quizlyname] for each question.
+     */
+    function createQuestionsAttemptsArray(questions, attempts) {
+        var question_attempts = [];
+        for (var key in questions) {
+          if (key == 'ratio')
+            continue;
+          var id = questions[key]['question_id'];
+          var score = questions[key]['weighted_score'];
+          var description = questions[key]['description'];
+          var quizly_name = '';
+          var desc = '';
+          if (typeof(description) == 'object') {  // Quizly questions are described as dicts
+             desc = description['desc'];          //  of the form {desc, name}
+             quizly_name = description['name'];
+          } else {
+            desc = description;                   // Non-quizly desc's are just strings
+          }
+          var type = questions[key]['question_type'];
+          if (id in attempts) {
+            question_attempts.push([id, attempts[id], score, type, desc, quizly_name]);
+          } else {
+            question_attempts.push([id, 0, score, type, desc, quizly_name]);
+          }
+        }
+	return question_attempts;
+    }
+
+
+    /*
+     * Retrieves the student's scores for the questions on a particular lesson.
+     *
+     * @param studentId the student's email
+     * @param unitId the unit number
+     * @param lessonId the lesson  number
+     * @param scores a dict containing the student's score data
+     * @return a array of the student's scores for the questions in given lessons
+     */
+    function getQuestionScoresForStudentByLesson(studentId, unitId, lessonId, scores) {
+	var questions = [];
+	if (scores) {
+	    if (scores[unitId]) {
+		if (scores[unitId][lessonId]) {
+		    questions = scores[unitId][lessonId];
+		}
+	    }
+	}
+	return questions;
+    }
+
+    /*
+     * Creates an n x 6 HTML table for a given lesson of n questions 
+     *  where each column consists of the question-id, the number
+     *  of attempts, the student's score, and several descriptors for the
+     *  question, including type, description, and quizly_name.
+     *
+     * @param lesson_id the lesson's id number
+     * @param attempts_array an array of the form [quid, attempts, score, ]
+     * @return an HTML table displaying the students attempts and scores
+     */
+    function get_attempts_table(unit_id, lesson_id, attempts_array) {
+      // Get and clear the table
+      var table = document.getElementById('question-attempts-' + lesson_id);
+      while (table.firstChild) {
+        table.removeChild(table.firstChild);
+      }
+      // Row 0 is for the question id and a clickable icon that will open the modal preview window
+      var row = table.insertRow(0);
+      var cell = row.insertCell(0);
+      cell.innerHTML = "Questions";
+
+      for (var i= 0; i < attempts_array.length; i++) {  // Queston Ids
+        var cell = row.insertCell(i+1);
+        var id = attempts_array[i][0];
+
+        // Make a unique class name for each clickable icon -- icons from material design, see link above
+        var md_class_name = "zmdi zmdi-" + id + " zmdi-eye";
+        var type = attempts_array[i][3];
+        var desc = attempts_array[i][4];
+        var qname = attempts_array[i][5];
+
+        // InnerHTML stores specifics about the question and supports a tooltip.
+        cell.innerHTML = "<div style='color:blue;' class='"  + md_class_name + "' id='Q" + id + "' uid='" 
+                          + unit_id + "' lid='" + lesson_id + "' type='" + type + "' qname='" + qname + "'></div>" + 
+             " <div class='tooltip'  > Q" + (i+1) + "<span class='tooltiptext'>" + desc + "</span></div";
+
+        var el = document.getElementById("Q" + id);
+        el.setAttribute('quid', id);
+        var type = el.getAttribute('type');
+        if (type != 'Quizly') {
+	   el.onclick = function() {  // Open a modal iframe to display the question
+             openModal();
+             modal = document.getElementById('question-preview');
+             modal.style.visibility = 'visible';
+             var params = {
+               action: 'question_preview',
+               quid: this.getAttribute('quid'),
+               url: ''
+             };
+             $('#question-preview').html($('<iframe />').attr(
+               {src: 'teacher?' + $.param(params)})).show(); 
+           };
+        } else {
+            el.onclick = function() {
+              openModal();
+              modal = document.getElementById('question-preview');
+              modal.style.visibility = 'visible';
+              var params = {
+                action: 'question_preview',
+                quid: 0,                      // Quizly quiz
+                url: "https://ram8647.appspot.com/mobileCSP/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname=" 
+                      + this.getAttribute('qname')
+              };
+              $('#question-preview').html($('<iframe />').attr(
+                 {src: 'teacher?' + $.param(params)})).show(); 
+            };
+        } // else
+      } // for
+
+      // Row 1 is for the number of attempts
+      row = table.insertRow(1);
+      cell = row.insertCell(0);
+      cell.innerHTML = "Attempts";
+      for (var i= 0; i < attempts_array.length; i++) {
+        var cell = row.insertCell(i+1);
+        cell.innerHTML = attempts_array[i][1];
+        if (attempts_array[i][1] > 5) {
+            cell.className = 'issue';
+        }
+      }
+
+      // Row 2 is for the student's score
+      row = table.insertRow(2);
+      cell = row.insertCell(0);
+      cell.innerHTML = "Scores";
+      for (var i= 0; i < attempts_array.length; i++) {
+        var cell = row.insertCell(i+1);
+        cell.innerHTML = attempts_array[i][2];
+        if (attempts_array[i][2] != 1 && attempts_array[i][1] > 0) {
+            cell.className = 'issue';
+        }
+      }
+      return table;
+   } // def
+  </script>
+  <script>
+
+    /*
+     * Retrieves the lesson progress as a ratio of correct answers / number of questions.
+     */
+    function get_lesson_progress(unit_id, lesson_id) {
+      var score_ratio = 'N/A';
+      if (studentJs['scores'][unit_id] && studentJs['scores'][unit_id][lesson_id]) 
+          score_ratio = studentJs['scores'][unit_id][lesson_id]['ratio'];
+      return score_ratio;
+    }
+    
+    /* 
+     * Handler for lesson selector. Displays a table of score quiz attempts and scores
+     * 
+     * @param unit_id the id number of the unit
+     * @param lesson_id the id number of the lesson
+     */
+    function handle_lesson_selection(unit_id, lesson_id) {
+
+      // Remove existing tables 
+      var tables = document.getElementsByClassName('question-attempts');
+      for (var i = 0; i < tables.length; i++) {
+        while(tables[i].firstChild) {
+          tables[i].removeChild(tables[i].firstChild);
+        }
+      }
+
+      var score_ratio = get_lesson_progress(unit_id, lesson_id);
+      var el = document.getElementById('lesson-completion-' + lesson_id);
+      el.innerHTML = score_ratio;
+
+       // If the lesson contains questions that have been attempted by the student, display them in a table.
+       var questions = getQuestionScoresForStudentByLesson(student_email, unit_id, lesson_id, studentJs['scores']);
+       var attempts_array  = createQuestionsAttemptsArray(questions, studentJs['attempts'][student_email]);
+       if (attempts_array.length > 0) {
+         get_attempts_table(unit_id, lesson_id, attempts_array);
+       }
+    }
+  </script>
+{% else %}
+  <script>
+      cbShowMsg('Invalid student email {{ student_email }}');
+  </script>
+{% endif %}
+
+<div id="student-detail-section" {% if not student_email %} style="display: none;" {% endif %} >
+ <table style="width:95%">
+ <tbody>
+  <tr>
+   <td style="width:85%">
+    <h2>Progress Details for Student {{ student.name }} (<span class="student-name">{{ student_email }})</span></h2>
+   </td>
+   <td>
+     <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()" >Back to Roster</button>   
+   </td>
+  </tr>
+  <tr>
+   <td>
+     By selecting a unit and then selecting lessons within units you can see detailed information on this student's progress and performance.
+     Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">additional instructions and documentation</a>.
+   </td>
+   <td>
+     &nbsp;
+   </td>
+  </tr>
+ </tbody>
+ </table>
+    <div class="student-detail" style="margin: 5px;">
+      <div style="margin: 3px;">
+       <table>
+        <tr>
+        <td>
+          <label class="student-course-completion"><span class="hover help yui-wk-div" data-id="course-completion"><b>Course Completion: </b></span> {{ student.progress_dict.course_progress }} %</label>
+        </td>
+        <td>
+          <progress class="student-course-progress" value="{{ student.progress_dict.course_progress|int / 100 }}">
+            <!-- Browsers that support the progress tag will ignore this div -->
+            <div class="progress-bar">
+             <span style="width: {{ student.progress_dict.course_progress|int / 100}} ;"></span>
+             </div>
+          </progress>
+         </td>
+         <td>&nbsp;&nbsp;</td>
+         <td>
+          <span class="hover help yui-wk-div" data-id="unit-completion"><label id="student-unit-completion"><b>Unit Completion: </b>N/A</label></span> 
+        </td>
+        <td>
+          <progress id="progress-unit-completion" class="student-unit-progress" value="0">
+            <!-- Browsers that support the progress tag will ignore this div -->
+            <div class="progress-bar">
+             <span style="width: 0%;"></span>
+             </div>
+          </progress>
+        </td>
+       </tr>
+      </table>
+      </div>
+    </div>
+
+    <hr>
+    <table class="student-detail-table gcb-pull-left" style="margin-top: 15px; width: 90%;">
+      <colgroup>
+        <col style="width: 30%">
+        <col>
+      </colgroup>
+
+      <tr>
+          <td>
+           <span class="hover help yui-wk-div" data-id="unitselect"><label><b>Select a Unit: </b></label></span>
+           <select id="unit-select-widget"  class="unit-select">
+              <option value="course_completion">Course</option>
+              {% if units %} 
+                {% for unit in units %}
+                   {% if unit.type == 'U' %}
+                         <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
+                   {% endif %}
+                {% endfor %}
+              {% endif %} 
+          </td>
+      </tr>
+    </table>
+
+    <div id="lessons-container">
+      <table id="lessons-table-headings" style="visibility:hidden; width:100%;">
+       <tr>
+        <th style="width:25%;"><span class="hover help yui-wk-div" data-id="lesson-title">Lesson Title</span></th>
+        <th style="width:15%;"><span class="hover help yui-wk-div" data-id="progress">Progress</span></th>
+        <th style="width:10%;"><span class="hover help yui-wk-div" data-id="scores">Scores</span></th>
+        <th style="width:50%;"><span class="hover help yui-wk-div" data-id="questions">Questions</span></th>
+       </tr>
+      </table>
+      <table id="lessons-table" style="width:100%;">
+      </table>
+    </div>
+
+</div>
+
+<!-- Modal window for previewing questions -->
+<!-- Should be outside main div so main div can be opaque background. -->
+<div id="modal-window" style="visibility:hidden;">
+  <div id="question-background"></div>
+  <div id="question-container">
+    <a style="visibility:hidden; position:absolute; right:5%; bottom:5%; " id="question-close-button" class="gcb-button">Close</a>
+    <div id="question-preview"><iframe  id="question-preview" /></div>
+  </div>
+</div>
+{% endblock %}

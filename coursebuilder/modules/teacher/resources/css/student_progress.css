@@ -1,0 +1,44 @@
+/* This sizes the progress bars on the page */
+progress[value] {
+  width: 125px;
+  height: 10px;
+  margin-top: 3px;
+
+  /* Reset the default appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /*Get rid of default border in Firefox */
+  border: none;
+
+  /* For IE10 */
+  color: #eee;
+}
+
+progress[value]::-webkit-progress-bar {
+  background-color: #eee;
+//  background-color: #0063a6;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+}
+
+/* For browsers that do not support the progress tag */
+.progress-bar {
+  background-color: whiteSmoke;
+  border-radius: 2px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.25) inset;
+
+  width: 125px;
+  height: 10px;
+
+  position: relative;
+  display: block;
+}
+.progress-bar > span {
+  background-color: #eee;
+  border-radius: 2px;
+  display: block;
+  text-indent: -9999px;
+}
+/* End of progress bar style */

@@ -35,6 +35,8 @@ from modules.quizly import quizly
 quizly.register_module().enable()
 from modules.khanex import khanex
 khanex.register_module().enable()
+from modules.teacher import teacher
+teacher.register_module().enable()
 
 # Set the default users service before we do anything else.
 users.UsersServiceManager.set(users.AppEnginePassthroughUsersService)

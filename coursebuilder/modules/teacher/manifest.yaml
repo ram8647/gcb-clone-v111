@@ -1,0 +1,6 @@
+files:
+  - modules/teacher/__init__.py
+  - modules/teacher/teacher.py
+  - modules/teacher/templates/teacher_list.html
+  - modules/teacher/manifest.yaml
+  - modules/teacher/messages.py

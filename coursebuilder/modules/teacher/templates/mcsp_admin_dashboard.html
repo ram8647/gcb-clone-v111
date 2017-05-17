@@ -1,0 +1,74 @@
+{% if teachers.add_action %}
+  <div class="gcb-button-toolbar">
+     <form id='gcb-add-teacher' action='{{ teachers.add_action }}' method='POST'>
+      <input type="hidden" name="xsrf_token" value="{{ teachers.add_xsrf_token }}">
+      <button class="gcb-button" type="submit">Add Teacher</button>
+    </form>
+  </div>
+{% endif %}
+
+<div class="gcb-list gcb-list--autostripe xsrf-token-holder"
+    data-status-xsrf-token-announcement="{{ status_xsrf_token }}">
+  <table>
+    <thead>
+      <tr>
+        <th class="gcb-list__cell--icon"></th>
+        <th class="gcb-list__cell--icon"></th>
+        <th>Registered Teachers</th>
+        <th class="gcb-list__cell--icon"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in teachers.children %}
+        <tr>
+
+          <td>
+            <div class="material-icons icon-draft-status gcb-list__icon gcb-list__iconrowhover 
+             {% if item.is_draft %}private{% else %}public{% endif %}" 
+             data-component-type="announcement" data-key="{{ item.key }}"
+            </div> 
+           </td> 
+
+          <td>
+            <a href="mcsp_admin?action=edit_teacher&key={{ item.key }}" class="gcb-list__icon gcb-list__iconrowhover material-icons">open_in_editor</a>
+          </td>
+
+          <td>
+            <a href="{{item.edit_action}}">
+              {{item.name}} &nbsp;&nbsp; {{item.email}} &nbsp;&nbsp; {{item.school}} &nbsp;&nbsp; 
+            <script>
+              (function() {
+                function pad(num) {
+                  return (num < 10 ? '0' : '') + num;
+                }
+                var date = new Date({{ item.date }});
+                var year = date.getFullYear();
+                var month = pad(date.getMonth() + 1);
+                var day = pad(date.getDate());
+                var dateString = year + '-' + month + '-' + day;
+                document.write(dateString);
+              })();
+            </script>
+            </a>
+          </td>
+
+          <td>
+            {% if item.delete_action %}
+            <form id='gcb-delete-teacher-{{ loop.index0 }}' action='{{ item.delete_action }}' method='POST'>
+              <input type="hidden" name="xsrf_token" value="{{ item.delete_xsrf_token }}">
+              <button class="material-icons gcb-list__icon gcb-list__icon--rowhover" type="submit"
+                onclick='return confirm("Are you sure you want to delete this teacher?");'>delete</button>
+            </form>
+            {% endif %}
+          </td>
+
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if not teachers.children|length %}
+    <div class="gcb-list__empty-message-wrapper">
+      <div class="gcb-list__empty-message">No items</div>
+    </div>
+  {% endif %}
+</div>
