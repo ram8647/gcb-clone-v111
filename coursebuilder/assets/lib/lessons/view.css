@@ -1,0 +1,54 @@
+.student-list-nav-bar-div {
+  clear: both;
+}
+
+.sl-footer {
+  clear: both;
+  padding-top: 4px;
+}
+
+#sl-info div {
+  float: left;
+}
+
+.gcb-pull-right {
+  float: right;
+}
+
+.gcb-button {
+  margin: 0px 0px 0px 4px;
+  padding: 4px 12px;
+  background-color: #37474F;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+h3 {
+    color: #37474F;
+#    border-bottom: 1px solid #455A64;
+    margin: 0px;
+    padding: 0px;
+}
+
+p.page-description, p.description {
+    font-size: 80%;
+    color: #666;
+}
+
+label.data {
+#  border-right: 1px solid #455A64;
+#  margin-right: 10px;
+#  padding-right: 10px;
+}
+
+label.data-last {
+
+}
+
+.label.title {
+  margin-left: 10px;
+  padding-left: 10px;
+}

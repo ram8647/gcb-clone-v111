@@ -1,0 +1,316 @@
+<!-- Redo of Lesson 3.2 -->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./tipped.css" />
+    <link rel="stylesheet" type="text/css" href="./lessons.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="./tipped.js"></script>
+    <script type="text/javascript" src="./framework.js"></script>
+
+    <title>3.4 Teach</title>
+
+    <style type="text/css">
+    </style>
+  </head>
+  <body>
+
+    <div class="Table">
+      <div class="Title">
+	<h2> Lesson Overview</h2>
+      </div>
+      <div class="Heading">
+	<div class="Cell">
+	  <p>Mobile CSP Objectives</p>
+	</div>
+	<div class="Cell">
+	  <p>Description of Lesson Activity</p>
+	</div>
+      </div>
+      <div class="Row">
+	<div class="Cell">
+	  <p><div class='hover lo' data-id="2.1.1">Learning Objective 2.1.1:</div> Describe the variety of abstractions used to represent data.
+ 	      <table style="color:green; border:0px; padding:0px; border-spacing:15px;"><tr><td class="bi" data-id="2">BI 2</td><td class="eu" data-id="2.1">EU 2.1</td><td class="ek" data-id="2.1.1b">EK 2.1.1b</td><td class="ctp" data-id="3">P 3</td></tr></table>
+</p>
+	</div>
+	<div class="Cell">
+	  <p>Students watch a video and a slide presentation to learn that digital images, like all digital data, are composed of bits.
+
+<p>They complete interactive exercise to practice using the run-length encoding technique to express images as numbers and numbers as images.
+</p>
+	</div>
+      </div>
+      <div class="Row">
+	<div class="Cell">
+	  <p>
+	  <li><div class='hover lo' data-id="2.1.2">Learning Objective 2.1.2:</div> Explain how binary sequences are used to represent digital data.
+	      <table style="color:green; border:0px; padding:0px; border-spacing:15px;"><tr><td class="bi" data-id="2">BI 2</td><td class="eu" data-id="2.1">EU 2.1</td><td class="ek" data-id="2.1.2d">EK 2.1.2d,f</td><td class="ctp" data-id="5">P 5</td></tr></table>
+	    <li><div class='hover lo' data-id="3.3.1">Learning Objective 3.3.1:</div> Analyze how data representation, storage, security, and transmission of data involve computational manipulation of information.
+	      <table style="color:green; border:0px; padding:0px; border-spacing:15px;"><tr><td class="bi" data-id="3">BI 3</td><td class="eu" data-id="3.3">EU 3.3</td><td class="ek" data-id="3.3.1c">EK 3.3.1c, d e</td><td class="ctp" data-id="4">P 4</td></tr></table>
+	  </p>
+</p>
+	</div>
+	<div class="Cell">
+	  <p>In their reflection portfolios, students explain how bits can have different meanings in different contexts. They also compare and contrast lossy and lossless encoding.</p>
+        </div>
+      </div>
+      </div>
+      <!-- PUT ADDITIONAL ROWS HERE -->
+    </div>
+
+<h2>Materials</h2>
+
+<blockquote>
+  <p> Projection system   *   Slides on encoding   *  Text version of lesson *   CS Unplugged Image Representation - printed copies of any worksheets you'll be using    
+</blockquote>
+
+
+<h2>Learning Activities</h2>
+
+<blockquote>
+  <h3>Hook/Motivation</h3>
+  <h4>Lesson Starter (5 minutes)</h4>
+
+  Ask students to think about how images are represented on
+  computers. If no one mentions it, explain computers break down images
+  into pixels, and that the term pixel is short for “picture element.”
+  Discuss image representation with the class, being sure to cover the
+  following points:
+
+  <ul>
+    <li>After breaking an image into pixels, computers use a
+      variety of methods to represent each pixel or groups of
+      pixels as numbers.
+    <li>Numbers are translated to bits, which are stored and sent like any other data.
+    <li>Other computers use the bits to reconstruct image.
+    <li>Storing specific information about every single bit
+      would be an enormous amount of data for an image. What are
+      some ways a computer might store an image using less data?a
+  </ul>
+
+  <h3>Experiences and Exploration</h3>
+
+  <h4>CS Unplugged Video (30 minutes)</h4> 
+
+  <p>Have students watch this <a target="_blank"
+				 href="https://www.youtube.com/watch?v=uaV2RuAJTjQ">CS
+      Unplugged video</a> on image compression for a quick look at
+    one way that images are represented and compressed.
+
+    <blockquote>
+      <div style="background-color:lightgrey">
+        <h4>PROFESSIONAL DEVELOPMENT</h4> Simple black-and-white
+        images such as fax images, as well as color pictures, have a
+        lot of repetition in them. To reduce amount of the data
+        needed to store and transmit images, computer scientists use
+        a variety of <a target="_blank"
+			href="http://en.wikipedia.org/wiki/Image_compression"> image
+	  compression</a> techniques. The technique demonstrated in
+        the video and used in this lesson is known
+        as <b><i>run-length encoding</i></b>,
+        or <b><i>RLE</i></b>. In this technique, the picture is
+        converted into numbers by recording the length of
+        alternating white and black pixels. This technique is well
+        suited to images that have a lot of repetition in them. For
+        example, fax images often have large blocks of white
+        (e.g. margins) or black pixels (e.g. a horizontal
+        line). Color pictures also have a lot of repetition in
+        them. In practice, programmers choose a compression
+        technique to best suit the image he or she is transmitting.
+
+        <p>From <i>CS Unplugged</i>: “If we didn't compress images
+	  it would take much longer to transmit pictures and require much more
+	  storage space. This would make it unfeasible to send faxes or put
+	  photos on a web page. For example, fax images are generally compressed
+	  to about a seventh of their original size, so without compression they
+	  would take seven times as long to transmit!  Photographs and pictures
+	  are often compressed to a tenth or even a hundredth of their original
+	  size (using a different technique). This allows many more images to be
+	  stored on a disk, and it means that viewing them over the web will
+	  take a fraction of the time.”
+      </div>
+    </blockquote>
+
+  <p>Ask students to explain to a partner how RLE works, and then
+    have them check their understanding by completing the
+    <a target="_blank" href="https://2-dot-ram8647.appspot.com/mobileCSP/unit?unit=22&lesson=34#exercises">interactive exercises</a> on the student site.
+
+  <p><b>DIFFERENTIATION:</b> More Practice. To provide more practice
+    with RLE, have students complete these <a target="_blank" 
+					      href="http://csunplugged.org/wp-content/uploads/2014/12/unplugged-02-image_representation.pdf">CS Unplugged Worksheets</a> (pg. 17-18).
+
+  <p><b>DIFFERENTIATION:</b> Enrichment. To extend students'
+    understanding of RLE have them complete p. 19 of
+    the <a target="_blank"
+	   href="http://csunplugged.org/wp-content/uploads/2014/12/unplugged-02-image_representation.pdf">CS
+      Unplugged Worksheets</a> (pg. 17-18).
+
+    <h4>Lecture or Reading (15 minutes)</h4>
+
+  <p>Present a more detailed explanation of run-length encoding,
+    storing images on computers, and other image compression
+    techniques. There are several ways you can present this information:
+
+    <ul>
+      <li> Have students watch the <a target="_blank"
+      href="https://www.youtube.com/watch?v=0sZgmw9ECCo">video</a> of
+      the Mobile CSP version of the lecture
+      <li> Use the <a target="_blank"
+      href="https://docs.google.com/presentation/d/1MmKmh7fJKCCfwGzA238VPXZYLkCZvIIUQZ9L-RIDEYQ/edit">slides</a>
+      to give the lecture yourself.
+      <li> Have students read the <a target="_blank"
+      href="https://docs.google.com/document/d/1Q4NinpY_-BLSjh9RVO1bD4apZYs4W93WbpX_nbas1Ec/edit">text-based
+      version</a> of the lesson.
+    </ul>
+
+  <p>If you are new to teaching Mobile CSP, we suggest starting by
+    having students watch the video lecture. As you become more
+    familiar with the lesson and its content, you may decide to use
+    the slides to give the lecture on your own, or guide students
+    through reading the text-based lesson.
+
+    <blockquote>
+	   <div style="background-color:lightgrey">
+	     <h4>PROFESSIONAL DEVELOPMENT</h4> 
+
+	     <p>There are generally two types of image compression
+	       techniques. Run-length encoding is
+	       a <b><i>lossless</i></b> technique, which means that the
+	       image is perfectly represented and no data are lost. It is
+	       the technique used in <b><i>TIFF</i></b> images. It is
+	       preferable for medical imaging, archival imaging, clip
+	       art, comics, and other applications.
+
+	     <p><i><b>Lossy compression</i></b> is not perfect. Some
+	       data may be lost. <b><i>JPEG</i></b> is an example of
+	       lossy compression. It is suitable for photographs and
+	       other applications where the loss of some data would be
+	       imperceptible.
+
+	     <p>The <i><b>trade-off</b></i> is between storage required
+	       for the image vs. fidelity or quality. If a lot of
+	       compression is required -- perhaps because of transmission
+	       requirements -- a lossy technique may be preferred.
+	   </div>
+	 </blockquote>
+
+	 <h3>Other Possible Activities</h3>
+
+	 <ol>
+	   <li>
+	     Have students take turns encoding messages in ASCII binary code 
+	     that someone else could decode. Trade messages in class and decode each others.
+	   </li>
+
+	   <li>Web pages use the HyperText Markup Language (HTML) to encode web pages. 
+	     Point students to the WWW Consortium's  
+	     <a target="_blank" href="http://www.w3schools.com/tags/ref_colormixer.asp">color mixer app</a> 
+	     and invite them to explore the different colors that are used in Web pages.  These
+	     colors are using a 24-bit scheme.
+	     Some problems to solve might be to figure out  the Hex code for pure red?  
+	     pure green? pure blue?
+	   </li>
+
+	   <li>Have students research other <span class="yui-tag-span yui-tag" tag="span" style="color: rgb(255, 0, 0);"><i><b>image types</b></i></span> (e.g. 
+	     <a target="_blank" href="http://en.wikipedia.org/wiki/Graphics_Interchange_Format">GIF</a>, 
+	     <a target="_blank" href="http://en.wikipedia.org/wiki/Portable_Network_Graphics">PNG</a>, 
+	     <a target="_blank" href="http://en.wikipedia.org/wiki/BMP_file_format">BMP</a>, 
+	     <a target="_blank" href="http://en.wikipedia.org/wiki/TIFF">TIFF</a>, etc.) 
+	     and then share discuss what they discovered in class. Ask them to compare and contrast the data 
+	     needed to  store information about the images. Include what type of compression is used. 
+	   </li>
+
+	   <li>Have students research and discuss the type of image format used by their 
+	     digital camera or a smartphone or tablet, find out what image representation scheme 
+	     it uses?  Question:  How come all images are not the same size?
+	   </li>
+
+	   <li>ASCII is one type of character code, but 128 characters is not enough for today’s computers, which 
+	     can represent Chinese, Hindi, and scripts from many other languages.  Today’s computers use a 
+	     system called Unicode, which has more than 100,000 different characters and covers more than 
+	     100 different scripts (languages). Invite students to use this 
+	       <a target="_blank" href="http://pages.ucsd.edu/~dkjordan/resources/unicodemaker.html">Unicode converter</a>
+	       to convert these 
+	       Chinese characters to their hexadecimal Unicode values:  åè.  Convert these 
+	       Greek letters: οι.  Convert these Russian letters: Я ю.  
+
+	   </p></li>
+	 </ol>
+
+	 <h3>Rethink, Reflect, and/or Revise</h3>
+
+	 <h4>Portfolio Refection (15 minutes)</h4>
+
+	 <p>Have students complete the first two questions of their
+	 portfolio reflections in class and tell them to complete the last
+         question for homework. 
+	 <blockquote>
+	   <ol>
+	   <li>Decode this message by converting it from binary to ASCII:
+	   1000001  1110000  1110000  0100000  1001001  1101110  1110110  1100101  1101110
+	   1110100  1101111  1110010  0100000  1010010  1001111  1000011  1001011  1010011
+	   0100001
+	   <br>
+	   You can use this chart to help you: <a href="https://docs.google.com/document/d/1Q4NinpY_-BLSjh9RVO1bD4apZYs4W93WbpX_nbas1Ec/edit#heading=h.6e2ngjbac86z">ASCII Conversion Chart</a>
+	   </li>
+	   <li>
+	   Describe what it means to say that <a href="http://en.wikipedia.org/wiki/JPEG">JPEG</a>
+	   is  a lossy 
+	   compression technique and  whether or not it affects the quality of camera pictures.
+	   </li>
+	   <li>Give a specific example of a binary sequence that can represent more 
+	   than one type of data -- 
+	   e.g., a number, a color, a character -- and describe how to interpret its 
+	   different values. 
+	   </li>
+
+	   </ol>
+	  </blockquote>
+
+         <p>The last question could be discussed when they turn in
+    their reflections and as preparation for the reading on electronic
+    documents in the next lesson.
+
+    <h2>Assessment Opportunties</h2>
+
+    <blockquote>
+     <p>You can examine students’ work on the interactive exercise and
+     their reflection portfolio entries to assess their progress on
+     the following learning objectives. If students are able to do
+     what is listed here, they are ready to move on to the next
+     lesson.
+
+     <h3>Interactive exercises</h3>
+
+      <li> <div class="hover lo" data-id="2.1.1">Learning Objective
+	 2.1.1</div> Students should be able to use RLE to translate
+	 the numbers to images of letters in exercises 1 and 2.
+
+         <p><b>MORE SUPPORT: </b> If students are unable to
+	 successfully complete the interactive exercises, consider
+	 providing more practice via these CS Unplugged Worksheets
+	 (pg. 17-18).
+
+
+       <h3>Reflection entry in portfolio</h3> 
+
+       <li> <div class="hover lo" data-id="2.1.1">Learning Objective
+       2.1.1</div> Students should be able translate the binary in
+       question 1 to ASCII to get the message “App Inventor ROCKS“.
+
+       <li> <div class="hover lo" data-id="3.3.1"> Learning Objective
+       3.3.1</div> They should, in question 2, be able to explain that
+       JPEG compression is a lossy technique because some information
+       is lost when this technique is used, but that these changes are
+       not perceptible to the human eye and so do not lower the
+       quality of the camera.
+
+       <li> <div class="hover lo" data-id="2.1.2"> Learning Objective
+       2.1.2</div> Finally, in question 3, they should be able to
+       describe how a binary sequence would be interpreted as a color
+       when used as part an image, as a letter when part of a text
+       message, and so on.
+
+    </blockquote>
+</body>
+</html>

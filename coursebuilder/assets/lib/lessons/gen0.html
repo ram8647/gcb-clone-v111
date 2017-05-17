@@ -1,0 +1,328 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./widget.css">
+
+    <title>4-bit computer</title>
+
+      <script>
+       var GEN = 0;      // Generation number
+
+       // Settings that control the architecture.
+       var ADDR_LEN = 4;
+       var INSTR_LEN = 4;
+       var WORD_LEN = ADDR_LEN + INSTR_LEN;  
+       var RAM_LEN = Math.pow(2,ADDR_LEN);
+       var VIS_RAM_LEN = 16;   // Visible RAM 
+
+      </script>
+
+    <script src="./converters.js"></script>
+    <script src="./hardware.js"></script>
+    <script src="./ui.js"></script>
+    <script src="./assembler.js"></script>
+    <script src="./loader.js"></script>
+
+    <script src="./edx-jsinput.js"></script>  <!-- For edX -->
+    <script src="/static/js/capa/src/jschannel.js"></script>  <!-- For edX -->
+
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+    <!-- Tipped  See http://www.tippedjs.com/  and http://www.tippedjs.com/license -->
+    <script type="text/javascript" src="./tipped.js"></script>
+    <link rel="stylesheet" type="text/css" href="./tipped.css" />
+    <style>
+    body {
+       font-family:"Times";
+    }
+    </style>
+
+    <script type='text/javascript'>
+    <!--  This is the Tipped Script. Handles the hover hints -->
+    <!--  See http://www.tippedjs.com/  and http://www.tippedjs.com/license -->
+
+    $(document).ready(function() {
+      Tipped.create('.boxes .box');
+    });
+    </script>
+    <script type="text/javascript">
+     $(document).ready(function() {
+      Tipped.create('.data', function(element) {
+        var addr = $(element).data('id');
+        return "Data @ address " + addr +  ": " +  ram[addr] ;
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('.instr', function(element) {
+        var addr = $(element).data('id');
+        return "Instr @ address " + addr + ": " + displayMnemonic(ram[addr]) ;
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('#pctr', function() {
+        return "Instruction Counter: " + icounter ;
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('#preg', function() {
+        return "Instruction Register: " + displayMnemonic(iregister);
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('#rega', function() {
+        return "Accumulator: " + accumulator ;
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('#restart', function() {
+        return "Restart the computer, reinitializing RAM and CPU.";
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+
+     $(document).ready(function() {
+      Tipped.create('#fetch', function() {
+        return "Fetch: Put the instruction at memory location given by ICTR in the IREG.";
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+
+     $(document).ready(function() {
+      Tipped.create('#exec', function() {
+        return "Execute: Execute the instruction currently in the IREG. ";
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('#run', function() {
+        return "Run : Run the program in RAM starting with the instruction at 0000. ";
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+
+     $(document).ready(function() {
+      Tipped.create('#reset', function() {
+        return "Reset : Reset the CPU by setting the ICTR to 0000 and IREG and ACC to 00000000. ";
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+     $(document).ready(function() {
+      Tipped.create('#help', function() {
+        return "Help: Display the documentation in a separate tab.";
+      }, {
+       cache: false,
+       position: 'right'
+      });
+     });
+
+    </script>
+    <script>
+      
+      // Mnemonics used in hover hints
+      var op = ["NOP", "LDA", "STA", "ADD", "SUB", "MUL", "DIV", "UND","PRN", "INP", "UND","UND","UND","UND","UND","UND"];
+
+      // Parse a assembly language instruction given its decimal value
+      function displayMnemonic(n) {
+	var str = pad(decToBinary(n), 8);
+	var instr = binaryToDecimal(str.substring(0,4));
+	var addr = str.substring(4);
+	return op[instr] + " " + addr;
+      }
+   </script>
+  </head>
+  <body onload='uiInit()'>
+
+   <div class="alignright">
+   <h3>Binary Numbers Table</h3>
+   <table border="1" style="background-color: #ffffff; border:1">
+     <tr><td>0</td><td>0000</td><tr>
+     <tr><td>1</td><td>0001</td></tr>
+     <tr><td>2</td><td>0010</td></tr>
+     <tr><td>3</td><td>0011</td></tr>
+     <tr><td>4</td><td>0100</td></tr>
+     <tr><td>5</td><td>0101</td></tr>
+     <tr><td>6</td><td>0110</td></tr>
+     <tr><td>7</td><td>0111</td></tr>
+     <tr><td>8</td><td>1000</td></tr>
+     <tr><td>9</td><td>1001</td></tr>
+     <tr><td>10</td><td>1010</td></tr>
+     <tr><td>11</td><td>1011</td></tr>
+     <tr><td>12</td><td>1100</td></tr>
+     <tr><td>13</td><td>1101</td></tr>
+     <tr><td>14</td><td>1110</td></tr>
+     <tr><td>15</td><td>1111</td></tr>
+   </table>
+   </div>
+
+    <div class="alignleft" style="width:600px">
+
+      <table class="container" style="width:595px;">
+	<tr>
+	  <td style="text-align:left">
+            <div class="alignleft" style="width:128px;">
+  	      <img style="width:128px;" src="./android_mobilecsp-192.jpg" alt="mobile csp logo">
+            </div>
+            <br /><label style="font-size:1.8em">4-Bit Computer Simulator</label>
+	  </td>
+	</tr>
+      </table>
+
+      <table class="widget" style="width:595px; border:1px">
+	<tr>
+	  <td>
+	    <table class="widget" style="width:585px">  <!-- computer table -->
+	      <tr>
+		<td style="padding-left:10px">
+		  <div id="userinterface">
+                    <table style="border:0px">
+                      <tr>
+                        <td style="border:0px; text-align:left;">
+                          <label style="color:red">Monitor</label><br />
+ 			  <textarea id="monitor" rows="10" cols="60" readonly></textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="border:0px; text-align:left;">
+                          <label style="color:red">Keyboard</label><br />
+ 			  <input id="keyboard" type="text" maxlength="40" size="40" onkeydown="handleKeyboardInput()" disabled />
+                        </td>
+                      </tr>
+                    </table>
+		  </div>
+                  <hr />
+		</TD>
+	      </TR>
+
+	      <tr>
+		<td>
+		  <div class='boxes position'>  <!-- start of boxes for tipped -->
+		    <table style="border:0px;padding-left:5px;">  <!-- RAM and CPU table -->
+		      <tr>
+			<td style="border: 1px solid red; text-align:left; width:300px; padding-left:5px">
+			  <div id="ram" style="visibility:visible; border:1px">
+			    <label style="color:red">RAM</label><br />
+                            <table><tr><td style="text-align:left"><u>INST</u></td><td>&nbsp;</td>
+				<td style="text-align:left"><u>DATA</u></td><td>&nbsp;</td></tr></table>
+
+                            <table class="ramcell"><tr><td>0000:</td><td><span class='instr' data-id="0"><input onkeyup="uiHandleRamDisplay(this,event)" id="m0000" type="text" size="8" value="00000000" maxlength="8"></span></td>
+				<td>1000:</td><td><span class='data' data-id="8"><input id="m1000"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8"></span></td></tr>
+                            </table>
+
+                            <table><tr><td>0001:</td><td><span class='instr' data-id="1"><input id="m0001"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8"></span></td>
+				<td>1001:</td><td><span class='data' data-id="9"><input id="m1001"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8"></span></td></tr>
+                            </table>
+                            <table><tr><td>0010:</td><td><span class='instr' data-id="2"><input id="m0010"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td>
+				<td>1010:</td><td><span class='data' data-id="10"><input id="m1010"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td></tr>
+                            </table>
+                            <table><tr><td>0011:</td><td><span class='instr' data-id="3"><input id="m0011"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td>
+				<td>1011:</td><td><span class='data' data-id="11"><input id="m1011"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td></tr>
+                            </table>
+                            <table><tr><td>0100:</td><td><span class='instr' data-id="4"><input id="m0100"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td>
+				<td>1100:</td><td><span class='data' data-id="12"><input id="m1100"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td></tr>
+                            </table>
+                            <table><tr><td>0101:</td><td><span class='instr' data-id="5"><input id="m0101"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td>
+				<td>1101:</td><td><span class='data' data-id="13"><input id="m1101" onkeyup="uiHandleRamDisplay(this,event)"  type="text" size="8" value="00000000" maxlength="8" ></span></td></tr>
+                            </table>
+                            <table><tr><td>0110:</td><td><span class='instr' data-id="6"><input id="m0110"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td>
+				<td>1110:</td><td><span class='data' data-id="14"><input id="m1110"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td></tr>
+                            </table>
+                            <table><tr><td>0111:</td><td><span class='instr' data-id="7"><input id="m0111"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td>
+				<td>1111:</td><td><span class='data' data-id="15"><input id="m1111"  onkeyup="uiHandleRamDisplay(this,event)" type="text" size="8" value="00000000" maxlength="8" ></span></td></tr>
+                            </table>
+                            <br /><br />
+			  </div>
+			</td>
+<!-- 			<td style="border:1px solid red; text-align:left;width:420px; padding-left:5px"> -->
+			<td style="border:1px solid red; text-align:left; width:300px; padding-left:5px">
+   			  <label style="color:red">CPU</label><br />
+			  <div id="cpu" style="visibility:visible">
+                            <table>
+                              <tr>
+				<td style="text-align:left"><u>ICTR:</u>&nbsp;</td>
+				<td style="text-align:left"><input id="pctr" type="text" size="4" value="0000" maxlength="4" readonly></td>
+				<td><u>IREG:</u></td><td><input id="preg" type="text" size="10"  value="00000000" maxlength="10" readonly></td>
+                              </tr>
+                            </table>
+                            <table>
+                              <tr>
+				<td style="text-align:left"><u>ACC:</u></td>
+				<td style="text-align:left"><input id="rega" type="text" size="10"  value="00000000" maxlength="10" readonly></td>
+   		                <td><button class="button2" type="button" id="reset" onclick="reset()">Reset</button></td>
+                              </tr>
+                            </table>
+
+                            <p style="font-size:0.74em">
+                              <br /><span style="color:red"><u>Instruction Set</u></span>
+                              <br />&nbsp;&nbsp;&lt;x&gt; is a 4-bit memory address
+                              <br />&nbsp;&nbsp;<span style="color:red">0000</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -- NOP (Do nothing)
+                              <br />&nbsp;&nbsp;<span style="color:red">0001</span> &lt;x&gt; -- LOAD value at &lt;x&gt; to ACC
+                              <br />&nbsp;&nbsp;<span style="color:red">0010</span> &lt;x&gt; -- STORE value in ACC at  &lt;x&gt;
+                              <br />&nbsp;&nbsp;<span style="color:red">0011</span> &lt;x&gt; -- ADD value at &lt;x&gt; to ACC
+                              <br />&nbsp;&nbsp;<span style="color:red">0100</span> &lt;x&gt; -- SUB value at  &lt;x&gt; from ACC
+                              <br />&nbsp;&nbsp;<span style="color:red">0101</span> &lt;x&gt; -- MUL ACC by value at  &lt;x&gt;
+                              <br />&nbsp;&nbsp;<span style="color:red">0110</span> &lt;x&gt; -- DIV ACC by value at  &lt;x&gt;
+                              <br />&nbsp;&nbsp;<span style="color:red">1000</span> &lt;x&gt; -- PRINT &lt;x&gt; to Monitor
+                              <br />&nbsp;&nbsp;<span style="color:red">1001</span> &lt;x&gt; -- INPUT keyboard to  &lt;x&gt;
+                              <br />
+                            </p>
+			  </div>
+			</td>
+		      </tr>
+		    </table> <!-- end of RAM & CPU table -->
+		  </div> <!-- end of boxes -->
+		  <hr />
+		</td>
+	      </tr>
+              <tr>
+		<td style="text-align:left; padding-left:10px; padding-top:5px; padding-bottom:5px">
+		  <button class="button2" type="button" id="restart" onclick="restart()">Restart</button>
+		  <button class="button2" type="button" id="fetch" onclick="fetchNextInstruction()">Fetch</button>
+		  <button class="button2" type="button" id="exec" onclick="executeCurrentInstruction()" style="background-color:grey">Execute</button>
+		  <button class="button2" type="button" id="run" onclick="fetchExecute()">Run</button>
+		  <a class="button2" id="help" style="text-align:center; float:right;"  target="_blank" href="https://docs.google.com/document/d/1Z0iEBNOJgflhYXm28ki6ZiWLCGtPgUm_yEWuvzjInv4">Help</a>
+		</td>
+              </tr>
+	    </table> <!-- end of computer table -->
+	  </td>
+	</tr>
+      </table>  <!-- end of main container -->
+    </div>
+  </body>
+</html>
