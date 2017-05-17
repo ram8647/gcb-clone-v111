@@ -1,0 +1,223 @@
+This is the source code for the Mobile CSP course, as currently implemented
+in Google Course Builder (GCB) version 1.11. 
+
+For more information on Course Builder, see the documentation at
+https://www.google.com/edu/openonline/course-builder/docs/1.10/set-up-course-builder/set-up-course-builder.html
+
+>>>>>>>>>>>>>>>>>>>>>>>>> DEPLOYING AND UPDATING THE COURSE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+>>>> To deploy or update, Google now uses gcloud
+>>>> See: https://cloud.google.com/appengine/docs/python/tools/uploadinganapp
+>>>> For example:
+>>>> $ gcloud app deploy app.yaml --project mobilecsp-201608 --version prod
+
+>>>> To authenticate, needed for ETL, you can use Application Default Credentials
+>>>> (https://developers.google.com/identity/protocols/application-default-credentials). Then you need to:
+
+$ export GOOGLE_APPLICATION_CREDENTIALS="mobilecsp-a87421b38d9a.json"
+
+>>>> Above authentication did not work for the ram8647 course, based on GCB 1.8.  Instead:
+>>>> Download and install Google Cloud APK
+$ gcloud auth login
+  You are now logged in as [ram8647@gmail.com].
+  Your current project is [mobilecsp-201608].  You can change this setting by running:
+$ gcloud config set project PROJECT_ID  # e.g., ram8647 or mobilecsp-201608
+
+>>>> To download course data -- i.e., lessons, etc. (The script has additional examples.)
+
+$ sh scripts/etl.sh download course / mobilecsp-201608.appspot.com  --archive_path ./coursecontent.zip
+
+>>>>>>>>>>>>>>>>>>>>>>>>> DOWNLOADING THE COURSE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Appears to download only the overridden assets -- i.e., assets that were uploaded 
+through the dashboard versus the command line. This makes sense given that the 
+non-overridden files are available in the local instance. 
+
+Student-Facing Branch For Dashboard (Db), select Course > Mobile CS Priniciples
+--------------------------------------------------------------------------------
+Here's a summary of the files that were ETL-downloaded from v110 from the mobileCSP.
+
+  files/
+    assets/css - main.css, main-mobile.css, minimal-mobile.css
+    assets/img - lots of images. See Db > Create > Images > MyItems
+    assets/js - activity-34.js (seems to be an unused file)
+    assets/lib
+      assets/lib/lessons - framework.js, lessons.css.  See Db > Style > JavaScript > MyItems
+      assets/lib/quizly - quizzes.json, blockly.html.  See Db > Style > JavaScript > MyItems
+  models/  
+    I18nProgressEntity.json  - empty
+    LabelEntity.json  - empty
+    QuestionEntity.json  - student-facing quiz questions
+    QuestionGroupEntity.json  - very few question groups (unused now)
+    ResourceBundleEntity.json  - empty
+    RoleEntity.json  - Teacher role (unused?)
+    _SkillEntity.json  - empty
+
+In Db > Style > Templates here are the views currently under MyItems:
+(i.e., these have been changed through the Db vs command-line)
+   views/base_course.html
+   views/resources.html
+   views/staff.html
+   views/unit.html
+
+Teacher-Facing Branch - For Dashboard (Db), select Course > Teaching Mobile CS Priniciples
+-----------------------------------------------------------------------------------------
+Here's a summary of the files that were ETL-downloaded from v110 from teach_mobileCSP
+> For Dashboard (Db) version, select Teaching Mobile CS Principles under Course
+  course.yaml - ??
+  files/
+    assets/css - main.css, main-mobile.css, minimal-mobile.css, jquery-ui.theme.min.css
+    assets/img - lots of images. In Db see Create > Images > MyItems
+    assets/js - activity-17.js (unused)
+    assets/lib  See Db > Style > JavaScript
+     - instanthangouts-0.1.0.j      
+     - ttzc.js
+     - lessons/ - framework.js, lessons.css . 
+    models/ 
+     LabelEntity.json  - empty
+     QuestionEntity.json - teacher-facing questions
+     QuestionGroupEntity.json 
+     ResourceBundleEntity.json  - empty
+     RoleEntity.json  - Teacher role (unused?)
+     _SkillEntity.json  - empty
+    
+In Db > Style > Templates here are views currently listed as MyItems
+(i.e., these have been changed through the Db vs command-line)
+  views/base_course.html
+  views/resources.html
+  views/staff.html
+  views/summary.html
+  views/unit.html
+
+For example, in asset/lib/ only quizzes.json and blockly.html were downloaded.  The following views
+were downloaded, which means these were the ones that we changed through the Dashboard.
+In v 1.10, these are listed as 'my items' under Style > Templates.
+
+  course.html
+  resources.html
+  staff.html
+  summary.html
+  unit.html
+
+>>>>>>>>>>>>>>>>>>>>>>>> CHANGING ON teach_mobileCSP <<<<<<<<<<<<<<<<<<<<<<<<
+* The '(Teachers)' tab appears only on the student site. This requires that
+  the Dashboard be used to change base-course.html on the Teacher site.
+
+>>>>>>>>>>>>>>>>>>>>>>>  SETTINGS  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+*  Note that settings are not necessarily copied over when you make new versions
+of an existing course. 
+
+* Also, if settings have been changed through the dashboard, then changing them
+in course.yaml doesn't seem to have an effect.
+
+* Also, templates and other assets that have been overridden in the dashboard
+are not updated via the command line (appcfg or deploy).  
+
+>>>>>>>>>>>>>>>>>>>>>>> OUTLINE OF UPGRADING PROCESS >>>>>>>>>>>>>>>>>>>>>>>>
+See details here:  
+   https://www.google.com/edu/openonline/course-builder/docs/1.10/upgrade-course-builder/upgrade-course-builder.html
+
+Basic outline
+- Download app data, from existing course, both mobileCSP and teach_mobileCSP branches.
+
+  sh scripts/etl.sh download course /mobilecsp mobilecsp-201608.appspot.com --archive_path ../gcb-download-mobilecsp-v18.zip
+  sh scripts/etl.sh download course /teach_mobilecsp mobilecsp-201608.appspot.com --archive_path ../gcb-download-teach_mobilecsp-v18.zip
+
+- Set up and deploy new version of GCB
+- Upload app data for both mobilecsp and teach_mobilecsp:
+
+  sh scripts/etl.sh upload course /mobilecsp mobilecsp-201608.appspot.com --archive_path ../gcb-download-mobilecsp-v18.zip
+  sh scripts/etl.sh upload course /teach_mobilecsp mobilecsp-201608.appspot.com --archive_path ../gcb-download-teach_mobilecsp-v18.zip
+
+-- Make a Custom changes (details below)
+
+>>>>>>>>>>>>>>>>>>>>>>     CUSTOM STUFF        <<<<<<<<<<<<<<<<<<<<<<<<<
+
+Here are the parts to the core GCB that have been modified. 
+
+* assets/lib - quizly Javascript source code, framework JavaScript source code
+
+* controllers/privacy.py  - 
+* models/progress.py      - Revised grading protocol -- i.e., blue dot code. 
+   (This was the most problematic to upgrade.)
+* modules/assessment_tags/ - resources and templates
+
+* modules/core_ui -- missing toggle-button.css error
+* modules/course/courses.py
+* modules/skill_map/competency.py
+
+* modules/quizly   -- custom module for Quizly exercises
+* modules/teacher  -- Teacher dashboard
+* modules/khanex     -- Khan academy exercises
+
+* views/base_course.html
+* views/preview.html
+* views/privacy.html
+
+>>>>>>>>>>>>>>>>>>>>>>   Student Course Resources Tab   <<<<<<<<<<<<<<<
+-- Copy resources.py into controllers/
+-- Copy resources.html into views/
+-- Edit modules/courses/courses.py to import resources.py : from controllers import resources
+-- Modify courses_routes list in  modules/courses/courses.py : ('/resources', resources.ResourcesHandler),
+-- Add custom code to view/base_course.html:
+
+       <!-- custom code: Resources  -->
+        <li {% if navbar.resources %}class='active'{% endif %}>
+          {# I18N: Navbar tab. #}
+          <a href="resources">{{ gettext('Resources') }}</a>
+        </li>
+       <!--  end custom code -->
+
+>>>>>>>>>>>>>>>>>>>>>>   CUSTOM Quizly          <<<<<<<<<<<<<<<<<<<<<<<<
+-- Add quizly/ controller directory to the modules directory. This includes quizly.py
+-- Copy quizly/ source code to assets:  assets/lib/quizly
+-- Import module in main.py:  from modules.quizly import quizly
+   Register quizly module in main.py: quizly.register_module().enable()
+   OR NEW in 1.10: register it custom.yaml (one or the other, not both)
+-- Edit /views/base_course.html as follows: 
+     ...
+     <script src="assets/lib/activity-generic-1.3.js"></script>
+
+<!-- ***********  CUSTOMIZATION required for Quizly assessments  ***                                                                                                     
+     * which are processed in activity-generic.js. so this has to                                                                                                        
+     * go after activity-generic.js.                                                                                                                                     
+     ***************************************************************                                                                                                     -->
+  <script src="assets/lib/quizly/activity-quizme.js"></script>
+
+  <script src="/modules/oeditor/_static/js/butterbar.js"></script>
+  ...
+
+-- TODO:  Quizly is not showing up in the v1.10 or v1.11 dashboard component editor
+
+>>>>>>>>>>>>>>>>>>>>>>  CUSTOM  Khanex          <<<<<<<<<<<<<<<<<<<<<<<<
+-- Add khanex/ directory to the modules directory
+-- Import module in main.py:  from modules.khanex import khanex
+   Register khanex module in main.py: khanex.register_module().enable()
+   OR NEW in 1.10: register it custom.yaml (one or the other, not both)
+
+>>>>>>>>>>>>>>>>>>>>>>   CUSTOM Lessons Framework and Hover <<<<<<<<<<<<<<<<<<<<<
+-- Copy the lessons/  folder into assets/lib/:   cp -r ../lessons assets/lib/
+
+
+>>>>>>>>>>>>>>>>>>>>>>  CUSTOM Teacher Dashboard     <<<<<<<<<<<<<<<<<<<<<<<<
+
+-- Add teacher directory to the modules directory
+-- Add modules.teacher.teacher to custom.yaml
+   OR Import module in main.py:  from modules.teacher_dashboard import teacher_dashboard
+   AND Register teacher_dashboard module in main.py: teacher_dashboard.register_module().enable()
+-- In models.py Replace the user_id property in the EventEntity class to the following line
+   user_id = db.StringProperty(indexed=True)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!  V1.11 Upgrade issues !!!!!!!!!!!!!!!!!!!!!!!!
+
+>>>>>>>>>>>>>>>>>>>>>>> NOT SURE IF THESE ARE NEEDED ANYMORE ?? <<<<<<<<<<<<<<<<<
+ preview.html -- not sure what this does? 
+ unit.html -- commented out the Show Syllabus/Hide Syllabus button
+
+>>>>>>>>>>>>>>>>>>>>>>>  assets/lib/activity-generic.js  <<<<<<<<<<<<<<<<<<<<<<<<
+NOTE:  Currently we are using the default v1.10 version of this file and everything seems to
+work.  At one point there was custom code in this file for processing Quizly Assessments (not activities)
+
+   * V1.10 Replaces gcbCanPostTagEvents to gcbCanRecordStudentEvents -- this is necessary to
+     record when questions are completed. gcbCanPostTagEvents (in controllers.utils)
+     seems to be deprecated??
+
+
