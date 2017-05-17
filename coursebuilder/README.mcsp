@@ -42,6 +42,8 @@ Here's a summary of the files that were ETL-downloaded from v110 from the mobile
     assets/lib
       assets/lib/lessons - framework.js, lessons.css.  See Db > Style > JavaScript > MyItems
       assets/lib/quizly - quizzes.json, blockly.html.  See Db > Style > JavaScript > MyItems
+  data/
+     course/course.json - this contains all units and lessons
   models/  
     I18nProgressEntity.json  - empty
     LabelEntity.json  - empty
@@ -71,6 +73,8 @@ Here's a summary of the files that were ETL-downloaded from v110 from teach_mobi
      - instanthangouts-0.1.0.j      
      - ttzc.js
      - lessons/ - framework.js, lessons.css . 
+    data/
+     course/course.json - this contains all units and lessons
     models/ 
      LabelEntity.json  - empty
      QuestionEntity.json - teacher-facing questions

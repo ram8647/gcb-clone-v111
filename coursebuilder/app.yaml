@@ -1,5 +1,9 @@
-application: mycourse  # FIXME: Replace this with your application id
-version: 1
+# NOTE: Google has changed things and you no longer specify the application field here.
+# Instead to deploy or update, use the command:
+# Not that this command will make 'prod' the default version serving 100%
+#  gcloud app deploy app.yaml --project mobilecsp-201608 --version dev051017
+#application:  mobilecsp-201608  # FIXME: Replace this with your application id
+#version: dev051017 #prod
 runtime: python27
 api_version: 1
 threadsafe: false
