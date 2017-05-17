@@ -30,6 +30,9 @@ from models import data_sources
 from models import models
 from models import student_work
 
+# Custom Mobile CSP Modules
+from modules.quizly import quizly
+quizly.register_module().enable()
 
 # Set the default users service before we do anything else.
 users.UsersServiceManager.set(users.AppEnginePassthroughUsersService)

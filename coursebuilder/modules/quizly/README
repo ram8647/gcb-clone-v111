@@ -1,0 +1,80 @@
+1/17/2016
+
+This is now the main implementation for Quizly quizzes in GCB.  Then are
+known as "ram8647: Quizly Exercises" in the GCB Lesson Editor.  The
+extensions/quizly version of this still works but is not integrated
+into GCB.  
+
+Initially this followed the khanex implementation but no longer does so
+extensively.  
+
+Here's how it works.
+
+* QuizlyExerciseTag(tags.BaseTag) -- implements Quizly as a tag. 
+ 
+  render() -- the method used to display the Quizly quiz in GCB. As
+    the quiz is loaded, a script is executed that adds a record for
+    the quiz, including its name and instanceid, to windows.quizlies.  
+    This is done for each quiz. 
+
+    A second script defines the checkAnswer() function, which is
+    invoked when the user clicks on Quizly's "Check Answer" button.
+    This script adds the result of the quiz to its windows.quizlies
+    record. And it invokes the gcbAudit() function in activity-generic.
+
+    A third script runs to input the gcb-index.html into the iframe and
+    setup the "Check Answer" button. 
+
+  get_scheme() -- this method sets of the widget that is used in GCB to
+    select a quiz from quizzes.json when creating a new quiz activity. 
+
+Overridden Classes
+==================
+The following overrides add the quizly tag to classes needed for 
+processing the POST request and for inputting whether the quiz
+has been completed when its page is loaded. 
+
+class QuizlyEventsRESTHandler(EventsRESTHandler):
+    """Overrides the default EventsRESTHandler to add tag-quizly"""
+
+    TAGS_THAT_TRIGGER_COMPONENT_COMPLETION.append('tag-quizly')
+
+class QuizlyUnitLessonCompletionTracker(UnitLessonCompletionTracker):
+    """Overrides the default  to add quizly to TRACKABLE list"""
+
+    TRACKABLE_COMPONENTS.append('quizly')
+
+Unused classes
+==============
+
+QuizlyExerciseRenderer -- couldn't figure out how to do this
+
+Functions
+=========
+register_module()  this function is invoked by main.py.  It doesn't
+  do much. 
+
+Implementation
+--------------
+To include this module you would only have to add the following lines to main.py:
+
+  import modules.quizly.quizly
+  ...
+  modules.quizly.quizly.register_module().enable()
+
+References
+----------
+For instructions on how to set up a custom module see:
+  https://code.google.com/p/course-builder/wiki/CreateModules
+
+A complete module for Khan Academy exercises is available here:
+  http://www.softwaresecretweapons.com/jspwiki/khan-academy-exercises-in-course-builder
+
+To create a custom component see 
+  https://code.google.com/p/course-builder/wiki/CreateComponents
+
+
+
+
+
+
