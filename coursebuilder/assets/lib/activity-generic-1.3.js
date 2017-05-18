@@ -32,7 +32,7 @@ function getFreshTag() {
 }
 
 // controls sending events to the server; off by default; override to enable
-var gcbCanRecordStudentEvents = false;
+var gcbCanRecordStudentEvents = true;
 
 // various XSRF tokens
 var eventXsrfToken = '';
