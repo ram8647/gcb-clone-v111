@@ -26,6 +26,7 @@ from modules.skill_map import constants
 
 from google.appengine.ext import db
 
+import logging
 
 class BaseCompetencyMeasure(object):
     """Base class to model the behavior of a competency measure algorithm."""
@@ -277,6 +278,11 @@ def _get_questions_scores_from_single_item(data):
         question_scores = [
             QuestionScore(quid, score)
             for quid, score in zip(data['quids'], data['individualScores'])]
+    ### CUSTOMIZATION
+    elif 'quid' not in data:
+        # Quizly quizzes don't have a quid. Need to fix that. Trying to fake it here.                                                                                                                    
+        logging.warning('***RAM*** competency.py._get_question_scores quizly question?')
+        question_scores = []
     else:
         question_scores = [QuestionScore(data['quid'], data['score'])]
     return question_scores
