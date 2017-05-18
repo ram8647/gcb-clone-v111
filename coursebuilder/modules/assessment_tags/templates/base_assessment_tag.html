@@ -39,7 +39,7 @@
 
   {% if progress is defined %}
     <div class="gcb-progress-icon-holder gcb-pull-right">
-      {% if progress == 1 %}
+      {% if progress == 2 %}
         <img src="assets/img/completed.png"
           alt="{# I18N: Alt text for image representing student progress. #}{{ gettext('Completed') }}"
           title="{# I18N: Alt text for image representing student progress. #}{{ gettext('Completed') }}"
@@ -48,6 +48,11 @@
         <img src="assets/img/not_started.png"
           alt="{# I18N: Alt text for image representing student progress. #}{{ gettext('Not yet started') }}"
           title="{# I18N: Alt text for image representing student progress. #}{{ gettext('Not yet started') }}"
+          class="gcb-progress-icon"/>
+      {% elif progress == 1 %}
+        <img src="assets/img/in_progress.png"
+          alt="{# I18N: Alt text for image representing student progress. #}{{ gettext('In progress') }}"
+          title="{# I18N: Alt text for image representing student progress. #}{{ gettext('In progress') }}"
           class="gcb-progress-icon"/>
       {% endif %}
     </div>

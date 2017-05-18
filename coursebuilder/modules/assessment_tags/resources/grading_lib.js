@@ -107,6 +107,27 @@ function getRandomPermutation(size, random) {
 }
 
 /**
+ * Mobile CSP CUSTOMIZATION.
+ * 
+ * Displays the appropriate blue dot as soon as the submit button is clicked.
+ * This is called from this file.  A corresponding function is included
+ * in quizly.py.
+ */ 
+function updateProgressIcon(question, score) {
+  console.log('RAM updateProgressIcon score= ' + score);
+  var id = question.id;
+  var div = document.getElementById(id);
+  //  var iconholder = div.previousSibling.previousSibling;
+  var iconholder = div.previousSibling.previousElementSibling;
+  var innerHtml = '';
+  if (score == 1) 
+    innerHtml = '<img alt="Completed" class="gcb-progress-icon" src="assets/img/completed.png" title="Completed">';
+  else
+    innerHtml = '<img alt="In_progress" class="gcb-progress-icon" src="assets/img/in_progress.png" title="In progress">';
+  iconholder.innerHTML = innerHtml;
+}
+
+/**
  * A class to handle multiple choice questions.
  */
 function McQuestion(el, questionData, messages, componentAudit, scored,
@@ -171,6 +192,8 @@ McQuestion.prototype.grade = function() {
     }
   });
   score = roundToTwoDecimalPlaces(Math.min(Math.max(score, 0), 1));
+  updateProgressIcon(that,score);  // CUSTOMIZATION: Update progress icon for this question
+
   if (this.data.allOrNothingGrading) {
     score = score > _CORRECT_ANSWER_CUTOFF ? 1.0 : 0.0;
   }
@@ -352,11 +375,14 @@ SaQuestion.prototype.onShowHint = function() {
 SaQuestion.prototype.grade = function() {
   var response = this.el.find(
       'div.qt-response > input, div.qt-response > textarea').val();
+  var score = 0;   // CUSTOMIZATION
+
   for (var i = 0; i < this.data.graders.length; i++) {
     var grader = this.data.graders[i];
     if (SaQuestion.MATCHERS[grader.matcher].matches(
         grader.response, response)) {
       var score = Math.min(Math.max(parseFloat(grader.score), 0), 1);
+      updateProgressIcon(this,score);  // CUSTOMIZATION: Update progress icon for this question
       return {
         answer: response,
         score: score,
@@ -365,6 +391,7 @@ SaQuestion.prototype.grade = function() {
       };
     }
   }
+  updateProgressIcon(this,score);  // CUSOMIZATION: Update progress icon for this question
   return {
     answer: response,
     score: 0.0,
