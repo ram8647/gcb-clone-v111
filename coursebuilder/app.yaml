@@ -1,9 +1,18 @@
 # NOTE: Google has changed things and you no longer specify the application field here.
 # Instead to deploy or update, use the command:
-# Not that this command will make 'prod' the default version serving 100%
-#  gcloud app deploy app.yaml --project mobilecsp-201608 --version dev051017
-#application:  mobilecsp-201608  # FIXME: Replace this with your application id
-#version: dev051017 #prod
+# Note that this command will make 'prod' the default version serving 100%
+# With this command it is not necessary to have the 'application' and 'version'
+# lines below:
+#
+# Use: gcloud app deploy app.yaml --project mobilecsp-2017 --version prod
+#
+# Actually in v1.11 it looks like there may be an issue with the gcloud script.
+# with the application and prod lines uncommented 
+
+# Use: ./scripts/deploy.sh mobilecsp-2017
+
+application:  mobilecsp-2017  # FIXME: Replace this with your application id
+version: prod
 runtime: python27
 api_version: 1
 threadsafe: false
