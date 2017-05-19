@@ -13,6 +13,11 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: EventEntity
+  properties:
+  - name: user_id
+  - name: recorded_on
+
 - kind: Notification
   properties:
   - name: _done_date
