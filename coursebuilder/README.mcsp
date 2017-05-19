@@ -195,6 +195,17 @@ Here are the parts to the core GCB that have been modified.
    AND Register teacher_dashboard module in main.py: teacher_dashboard.register_module().enable()
 -- In models.py Replace the user_id property in the EventEntity class to the following line
    user_id = db.StringProperty(indexed=True)
+-- In view/base_course.html add the following: 
+        {% endfor %}
+        <!-- CUSTOMIZATION - Teacher Dashboard -->
+        {% if not transient_student %}
+          <li {% if navbar.teacher %}class='active'{% endif %}>
+             {# I18N: Navbar tab. #}
+             <a href="teacher">{{ gettext('(Teachers)') }}</a>
+          </li>
+        {% endif %}
+        <!-- right-aligned links are in order -->
+   
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!  V1.11 Upgrade issues !!!!!!!!!!!!!!!!!!!!!!!!
 
