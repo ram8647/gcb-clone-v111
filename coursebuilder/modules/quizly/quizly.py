@@ -30,7 +30,7 @@ Here is how to install, activate and use this module:
     - download this package
     - copy all files in this package into /modules/quizly/... folder of your
       Course Builder application folder
-    - edit main.app of your application
+    - edit main.py of your application
         - add new import where all other modules are imported:
           import modules.quizly.quizly
         - enable the module, where all other modules are enabled:
@@ -38,7 +38,7 @@ Here is how to install, activate and use this module:
     - restart your local development sever or re-deploy your application
     - TODO:  In GCB 1.10, Quizly Exercise doesn't show up in component editor
 
-     -------- From here down no longer applies
+     -------- The following points no longer apply
     - edit a lesson using visual editor; you should be able to add a new
       component type "Ram8647: Quizly Exercise"
     - the component editor should show a list of all available Quizly exercises in a
@@ -55,28 +55,6 @@ Here is how to install, activate and use this module:
 This work is based on Simikov's khanex project, which brings Khan Academy exercises to
 WordPress. You can learn more about it here:
   http://www.softwaresecretweapons.com/jspwiki/khan-exercises
-
-Here are the things I found difficult to do while completing this integration:
-    - if a unit is marked completed in a progress tracking system, and author
-      adds new unit - the progress indicator is now wrong and must be recomputed
-      to account for a new added unit
-    - why don't we see circles next to the lessons of the left nav. of the unit?
-    - how does a tag/module know what unit/lesson is being shown now? we need to
-      pass some kind of course_context into tag/module... how much of view model
-      do we expose to the tag/module? can a tag instance introspect what is
-      above and below it in the rendering context?
-    - we do show "Loading..." indicator while exercise JavaScript loads up,
-      but it is dismissed too early now
-    - tag.render() method must give access to the handler, ideally before the
-      rendering phase begins
-    - our model for tracking progress assumes lesson is an atomic thing; so
-      if one has 3 exercises on one lesson page, only one marker is used and
-      it is not possible to track progress of individual exercises; ideally any
-      container should automatically support progress tracking for its children
-
-We need to improve these over time.
-
-Good luck!
 """
 
 __author__ = 'Pavel Simakov (pavel@vokamis.com), Ralph Morelli (ram8647@gmail.com)'
