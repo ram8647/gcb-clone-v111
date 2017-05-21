@@ -31,6 +31,9 @@ from tools import verify
 
 from modules.teacher.student_answers import StudentAnswersEntity
 
+# CUSTOMIZATION - Mobile CSP debug flag
+DEBUG = True
+
 # Names of component tags that are tracked for progress calculations.
 TRACKABLE_COMPONENTS = [
     'question',
@@ -333,7 +336,8 @@ class UnitLessonCompletionTracker(object):
                     # Assessment file does not exist.
                     continue
 
-        logging.debug('***RAM*** id_to_assessments dict ' + str(id_to_assessments))
+        if DEBUG:
+          logging.debug('***RAM*** id_to_assessments dict ' + str(id_to_assessments))
         return id_to_assessments
 
     def _get_link_for_assessment(self, assessment_id):
@@ -544,7 +548,7 @@ class UnitLessonCompletionTracker(object):
         assert len(split_event_key) == 2
         unit_id = split_event_key[1]
 
-#       CUSTOMIZATION: Forces reset of progress after wrong answer#
+#       CUSTOMIZATION: Comment this out forces reset of progress after wrong answer
 #         if self._get_entity_value(progress, event_key) == self.COMPLETED_STATE:
 #             return
 
@@ -586,8 +590,9 @@ class UnitLessonCompletionTracker(object):
         unit_id = split_event_key[1]
         lesson_id = split_event_key[3]
 
-        logging.debug('***RAM*** _update_lesson ' + str(unit_id) + ' ' + str(lesson_id))
-#       CUSTOMIZATION: Forces reset of progress after wrong answer#
+        if DEBUG: 
+          logging.debug('***RAM*** _update_lesson ' + str(unit_id) + ' ' + str(lesson_id))
+#       CUSTOMIZATION: Commenting this out forces reset of progress after wrong answer
 #         if self._get_entity_value(progress, event_key) == self.COMPLETED_STATE:
 #             return
 
@@ -600,17 +605,20 @@ class UnitLessonCompletionTracker(object):
                 # Is the activity completed?
                 if (lesson.activity and self.get_activity_status(
                         progress, unit_id, lesson_id) != self.COMPLETED_STATE):
-#                    logging.debug('***RAM*** _update_lesson ACTIVITY NOT ALL COMPLETED: ' + str(lesson_id))
+                    if DEBUG:
+                      logging.debug('***RAM*** _update_lesson FOUND ACTIVITY NOT COMPLETED: ' + str(lesson_id))
                     return
 
                 # Are all components of the lesson completed?
                 if (self.get_html_status(
                         progress, unit_id, lesson_id) != self.COMPLETED_STATE):
-                    logging.debug('***RAM*** _update_lesson COMPONENTS NOT ALL COMPLETED: ' + str(lesson_id))
+                    if DEBUG:
+                      logging.debug('***RAM*** _update_lesson FOUND COMPONENT NOT COMPLETED: ' + str(lesson_id))
                     return
 
         # Record that all activities in this lesson have been completed.
-        logging.warning('***RAM*** _update_lesson ALL ACTIVITIES COMPLETED: ' + str(lesson_id))
+        if DEBUG:
+          logging.debug('***RAM*** _update_lesson ALL ACTIVITIES COMPLETED: ' + str(lesson_id))
         self._set_entity_value(progress, event_key, self.COMPLETED_STATE)
 
     def _update_activity(self, progress, event_key, student=None):
@@ -620,6 +628,9 @@ class UnitLessonCompletionTracker(object):
         unit_id = split_event_key[1]
         lesson_id = split_event_key[3]
 
+        if DEBUG:
+          logging.debug('***RAM*** _update_activity ' + str(unit_id) + ' ' + str(lesson_id))
+        # Mobile CSP doesn't use activities so this may be okay?
         if self._get_entity_value(progress, event_key) == self.COMPLETED_STATE:
             return
 
@@ -642,25 +653,28 @@ class UnitLessonCompletionTracker(object):
         unit_id = split_event_key[1]
         lesson_id = split_event_key[3]
 
-#       CUSTOMIZATION: Forces reset of progress after wrong answer#
+#       CUSTOMIZATION: Commenting this out forces reset of progress after wrong answer
 #         if self._get_entity_value(progress, event_key) == self.COMPLETED_STATE:
 #             logging.warning('***RAM*** update_html ALREADY COMPLETED ' )
 #             return
 
         # Record that at least one block in this activity has been completed.
         self._set_entity_value(progress, event_key, self.IN_PROGRESS_STATE)
-        logging.debug('***RAM*** update_html lesson ' + str(lesson_id) + ' IN_PROGRESS ' )
+        if DEBUG:
+          logging.debug('***RAM*** update_html lesson ' + str(lesson_id) + ' IN_PROGRESS ' )
 
         cpt_ids = self.get_valid_component_ids(unit_id, lesson_id)
         for cpt_id in cpt_ids:
             if not self.is_component_completed(
                     progress, unit_id, lesson_id, cpt_id, student):
-                logging.debug('***RAM*** update_html cpt ' + str(cpt_id) + ' NOT COMPLETED ' )
+                if DEBUG:
+                  logging.debug('***RAM*** update_html cpt ' + str(cpt_id) + ' NOT COMPLETED ' )
                 return
 
         # Record that all blocks in this activity have been completed.
         self._set_entity_value(progress, event_key, self.COMPLETED_STATE)
-        logging.debug('***RAM*** update_html ' + str(cpt_id) + ' MARKING COMPLETED ' )
+        if DEBUG:
+          logging.debug('***RAM*** update_html ' + str(cpt_id) + ' MARKING COMPLETED ' )
 
     def _update_custom_unit(self, student, event_key, state):
         """Update custom unit."""
@@ -753,6 +767,8 @@ class UnitLessonCompletionTracker(object):
         """Records that the given student has completed an activity."""
         if not self._get_course().is_valid_unit_lesson_id(unit_id, lesson_id):
             return
+        if DEBUG:
+          logging.debug('***RAM*** put_activity_completed ' + str(unit_id) + ',' + str(lesson_id))
         self._put_event(
             student, 'activity', self._get_activity_key(unit_id, lesson_id))
 
@@ -760,6 +776,8 @@ class UnitLessonCompletionTracker(object):
         """Records that the given student has completed a lesson page."""
         if not self._get_course().is_valid_unit_lesson_id(unit_id, lesson_id):
             return
+        if DEBUG:
+          logging.debug('***RAM*** put_html_completed ' + str(unit_id) + ',' + str(lesson_id))
         self._put_event(
             student, 'html', self._get_html_key(unit_id, lesson_id))
 
@@ -769,6 +787,8 @@ class UnitLessonCompletionTracker(object):
             return
         if block_id not in self.get_valid_block_ids(unit_id, lesson_id):
             return
+        if DEBUG:
+          logging.debug('***RAM*** put_block_completed ' + str(unit_id) + ',' + str(lesson_id) + ',' + str(block_id) )
         self._put_event(
             student,
             'block',
@@ -781,6 +801,8 @@ class UnitLessonCompletionTracker(object):
             return
         if cpt_id not in self.get_valid_component_ids(unit_id, lesson_id):
             return
+        if DEBUG:
+          logging.debug('***RAM*** put_component_completed ' + str(unit_id) + ',' + str(lesson_id) + ',' + str(cpt_id) )
         self._put_event(
             student,
             'component',
@@ -814,6 +836,8 @@ class UnitLessonCompletionTracker(object):
         """Records that the given student has accessed this activity."""
         # This method currently exists because we need to mark activities
         # without interactive blocks as 'completed' when they are accessed.
+        if DEBUG:
+          logging.debug('***RAM*** put_activity_accessed ' + str(unit_id) + ', ' + str(lesson_id))
         if not self.get_valid_block_ids(unit_id, lesson_id):
             self.put_activity_completed(student, unit_id, lesson_id)
 
@@ -821,6 +845,18 @@ class UnitLessonCompletionTracker(object):
         """Records that the given student has accessed this lesson page."""
         # This method currently exists because we need to mark lesson bodies
         # without interactive blocks as 'completed' when they are accessed.
+        if DEBUG:
+          logging.debug('***RAM*** put_html_accessed ' + str(unit_id) + ', ' + str(lesson_id))
+
+        # CUSTOMIZATION - visiting an html page (a lesson) automatically marks the lesson in-progress
+        # NOT WORKING YET
+        progress = self.get_or_create_progress(student)
+        event_key = self._get_lesson_key(unit_id, lesson_id)
+        logging.debug('***RAM*** event_key = ' + str(event_key))
+        self._update_lesson(progress, event_key, student)
+        progress.put() 
+        # END CUSTOMIZATION
+       
         if not self.get_valid_component_ids(unit_id, lesson_id):
             self.put_html_completed(student, unit_id, lesson_id)
 
@@ -858,7 +894,8 @@ class UnitLessonCompletionTracker(object):
                 # This is not a derived event, so increment its counter by one.
                 self._inc(progress, event_key)
         else:
-            # Change from v1.10 this if/else was not in v1.11, just the ELSE part
+#            Change from v1.10 this if/else was not in v1.11, just the ELSE part ??
+#            Not sure what effect it has
             if event_entity in ['html', 'activity', 'lesson']:
                 self.UPDATER_MAPPING[event_entity](self, progress, event_key, student)
             else:
@@ -940,17 +977,20 @@ class UnitLessonCompletionTracker(object):
         status = 0
         
         if student:
-            logging.debug('***RAM*** get_component_status DATASTORE OP ' + str(cpt_id) + ' = ' + str(attempts) + ',' + str(score))
+            if DEBUG:
+              logging.debug('***RAM*** get_component_status DATASTORE OP ' + str(cpt_id) + ' = ' + str(attempts) + ',' + str(score))
             student_answers = StudentAnswersEntity.get_answers_dict_for_student(student)
         if student_answers:
-            logging.debug('***RAM*** cpt_id ' + str(cpt_id) + ' ' + str(lesson_id) + ' ' + str(unit_id))
+            if DEBUG:
+              logging.debug('***RAM*** cpt_id ' + str(cpt_id) + ' ' + str(lesson_id) + ' ' + str(unit_id))
 #            logging.debug('***RAM*** answers ' + str(student_answers))
             if str(unit_id) in student_answers['answers']:
                 if str(lesson_id) in student_answers['answers'][str(unit_id)]:
                     if str(cpt_id) in student_answers['answers'][str(unit_id)][str(lesson_id)]:
                         score = student_answers['answers'][str(unit_id)][str(lesson_id)][str(cpt_id)]['score']
                         attempts = student_answers['answers'][str(unit_id)][str(lesson_id)][str(cpt_id)]['attempts']
-                        logging.debug('***RAM*** is_component_completed attempts,score ' + str(cpt_id) + ' = ' + str(attempts) + ',' + str(score))
+                        if DEBUG:
+                          logging.debug('***RAM*** is_component_completed attempts,score ' + str(cpt_id) + ' = ' + str(attempts) + ',' + str(score))
         if attempts > 0:
             status = 1
         if score >= 1:
@@ -967,10 +1007,12 @@ class UnitLessonCompletionTracker(object):
 
         value = self._get_entity_value(
             progress, self._get_component_key(unit_id, lesson_id, cpt_id))
-        logging.debug('***RAM*** is_component_completed value T if > 0 ' + str(cpt_id) + ' = ' + str(value))
+        if DEBUG:
+          logging.debug('***RAM*** is_component_completed value T if > 0 ' + str(cpt_id) + ' = ' + str(value))
 
         status = self.get_component_status(unit_id, lesson_id, cpt_id, student)
-        logging.debug('***RAM*** is_component_completed status =  ' + str(status))
+        if DEBUG:
+          logging.debug('***RAM*** is_component_completed status =  ' + str(status))
         return status == 2
 
     def is_assessment_completed(self, progress, assessment_id):
@@ -1070,7 +1112,8 @@ class UnitLessonCompletionTracker(object):
                                     num_completed += 1
                         result[unit.unit_id] = round(
                             num_completed / float(len(lesson_progress)), 3)
-        logging.debug('***RAM*** get_unit_progress result ' + str(result))
+        if DEBUG:
+          logging.debug('***RAM*** get_unit_progress result ' + str(result))
         return result
 
     def get_lesson_progress(self, student, unit_id, progress=None):
@@ -1091,7 +1134,8 @@ class UnitLessonCompletionTracker(object):
                     progress, unit_id, lesson.lesson_id) or 0,
                 'has_activity': lesson.has_activity,
             }
-        logging.debug('***RAM*** get_unit_progress lesson ' + str(result))
+        if DEBUG:
+          logging.debug('***RAM*** get_unit_progress lesson ' + str(result))
         return result
 
     ### CUSTOMIZATION We added in 1.10
@@ -1122,7 +1166,8 @@ class UnitLessonCompletionTracker(object):
           key: the student property whose value should be incremented
           value: the value to increment this property by
         """
-        logging.debug('***RAM*** set value ' + str(key) + ' =  ' + str(value))
+        if DEBUG:
+          logging.debug('***RAM*** set entity value ' + str(key) + ' =  ' + str(value))
         try:
             progress_dict = transforms.loads(student_property.value)
         except (AttributeError, TypeError):
