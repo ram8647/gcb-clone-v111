@@ -313,7 +313,8 @@ class TeacherDashboardHandler(
                 disable = True
 
         if disable:
-            self.redirect('/course')
+#            self.redirect('/course')
+            self._render()
         else:
             sections = CourseSectionEntity.get_sections()
             sections = TeacherRights.apply_rights(self, sections)
