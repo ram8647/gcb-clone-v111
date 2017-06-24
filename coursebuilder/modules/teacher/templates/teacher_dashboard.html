@@ -37,7 +37,7 @@
         <tbody>
          <tr>
           <td style="width:70%">
-            <h2>Teacher Dashboard</h2>
+            <h3>Teacher Dashboard</h3>
              <p>
                You can manage your student enrollment here, as well as view each student's progress at the course, unit, and lesson level.
                &nbsp;Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">instructions and documentation</a>.
@@ -84,7 +84,7 @@
         {% if teacher.sections %}
         <div class="gcb-list gcb-list--autostripe xsrf-token-holder"
              data-status-xsrf-token-teacher-dashboard="{{ status_xsrf_token }}">
-         <h2>Sections for Teacher {{ teacher_email }}</h2>
+         <h4>Sections for Teacher {{ teacher_email }}</h4>
          <table>
           <thead>
            <tr>
@@ -153,16 +153,17 @@
 <!-- If not approved teacher -->
 {% else %}
 {# I18N: Shown if the user is not registered for the dashboard. #}
-<p>
-<hr>
+
+	    <div style="font-size:12px; width:95%">
+	    <p>
 The Teacher Dashboard is only available to teachers who have been
 registered to use it. It provides teachers a tool to monitor the performance of their students. 
 	    Instructions for registering for the Teacher Dashboard are posted to the Teaching Mobile CSP Forum. 
 	    If you have not yet joined the Teaching Mobile CSP forum, please go 
 <a href="https://mobilecsp-2017.appspot.com/teach_mobilecsp/unit?unit=1&lesson=39">here</a> 
 to sign up. 
-<p>All teachers can access the <a href="https://mobilecsp-2017.appspot.com/teach_mobilecsp/">Mobile CSP Teacher Site</a> for lesson plans and resources.</p>
- 
+		    </p>
+	    </div>
 {% endif %} <!-- if teacher -->
         
    
