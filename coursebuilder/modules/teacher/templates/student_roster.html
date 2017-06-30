@@ -10,7 +10,7 @@
 
 {% block subtitle %}
   {# I18N: Title of the webpage. #}
-  - {{ gettext('Student Roster') }}
+    {{ gettext('Student Roster') }}
 {% endblock subtitle %}
 
 {% block assets %}
@@ -18,9 +18,9 @@
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" type="text/css" href="assets/lib/lessons/tipped.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
-  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css" /> 
-  <style> 
-  .correct{background-color: #ccffcc;} 
+  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css" />
+  <style>
+    .correct {background-color: #ccffcc;}
   </style>
   <script type="text/javascript" src="/modules/teacher/resources/js/modal-window.js"></script>
   <script src="assets/lib/lessons/tipped.js"></script>
@@ -41,10 +41,10 @@
       // Initilize the modal window -- is this used?
       setUpModalWindow();
     });
-  
-    var documentation = { 
+
+    var documentation = {
       "quiz" : "For a given lesson, question progress gives the ratio of the number of correct quiz answers over the total number of quizzes in the lesson. N/A means either that the lesson was not started or has no quizzes .",
-      "lesson" : "For a given unit, lesson progress is either complete, in-progress, or not started. A lesson is considered complete if the student has attempted all of the quiz questions in the lesson. A lesson  that contains no quizzes is marked 'complete' when its page is visited.", 
+      "lesson" : "For a given unit, lesson progress is either complete, in-progress, or not started. A lesson is considered complete if the student has attempted all of the quiz questions in the lesson. A lesson  that contains no quizzes is marked 'complete' when its page is visited.",
       "course": "Course progress is the overall percentage of the course completed by the student.",
       "unit": "Unit progress is the percentage of lessons completed in that unit. Lessons that do not contain quizzes are considered complete when visited.",
       "add/remove": "This button will let you add or remove students from your course.",
@@ -56,7 +56,7 @@
 
     /*
      * Resets the page when navigated to via Back button
-     */  
+     */
     $(window).bind("pageshow", function() {
       // Initialize drop-downs for unit and lesson.
       clear_questions_table(document.getElementById('questions-table'));
@@ -102,7 +102,7 @@
     }
 
     /*
-     * Fills in student performance and progress data for a given unit and lesson 
+     * Fills in student performance and progress data for a given unit and lesson
      *  by performing lookups in the studentJs data table.
      *
      *  @param unit_id the unit number
@@ -116,7 +116,7 @@
          var unit_icon = document.getElementById('student-unit-icon-holder-' + (i+1)); // table cells are 1-indexed
          var lesson_cell = document.getElementById('student-lesson-status-holder-' + (i+1));
          var lesson_icon = document.getElementById('student-lesson-icon-holder-' + (i+1));  // icon
-         var quizzes_cell = document.getElementById('student-quizzes-cell-' + (i+1)); 
+         var quizzes_cell = document.getElementById('student-quizzes-cell-' + (i+1));
          {% if has_scores %}
            var quiz_ratio = get_quiz_ratio(student, unit_id,lesson_id);
            quizzes_cell.innerHTML = quiz_ratio;
@@ -212,16 +212,16 @@
     /*
      * Constructs a table of scores for the questions in (unit_id, lesson_id).
      * Based on Eric Hiller's jquery algorithm -- nice!
-     * 
+     *
      * The table shows the number of times students in the course
      *  selected particular choices as their answers.
      */
     function construct_questions_table(unit_id, lesson_id) {
       questions_table = {}
-      for (var i = 0; i < studentsJs.length; i++) { 
+      for (var i = 0; i < studentsJs.length; i++) {
         var scores = studentsJs[i]['scores'];
         // If this student did questions in (unit,lesson)
-        if (scores[unit_id] && scores[unit_id][lesson_id]) { 
+        if (scores[unit_id] && scores[unit_id][lesson_id]) {
             var questions = scores[unit_id][lesson_id];
             for (var index in questions) {
               if (index == 'ratio')
@@ -251,13 +251,13 @@
 		if (! (sequence in questions_table) ) {
 		    for (var choice in question['choices']) {
 		      question['choices'][choice]['counter'] = 0;
-		    }          
+		    }
 		    questions_table[sequence] = question;
 		} // if sequence
 		for (var answer in question['answers']) {
 		  if (question['question_type'] == 'McQuestion') {
 		    var index = question['answers'][answer];
-		    questions_table[sequence]['choices'][index]['counter'] += 1;                
+		    questions_table[sequence]['choices'][index]['counter'] += 1;
 		  }
 		}
               } // Quizly or not
@@ -285,14 +285,14 @@
       var x = document.getElementById('lesson-select-widget').selectedIndex;
       if (Object.keys(questions_dict).length === 0) {
         table.createCaption();
-        table.innerHTML = '<b>Currently there are no questions and answers to display for lesson: ' + 
+        table.innerHTML = '<b>Currently there are no questions and answers to display for lesson: ' +
          document.getElementById('lesson-select-widget').options[x].innerHTML + '</b>';
         return;
       }
 
       // Set the table title
       table.createCaption();
-      table.innerHTML = '<b>Aggregate Class Peformance on ' + 
+      table.innerHTML = '<b>Aggregate Class Peformance on ' +
          document.getElementById('lesson-select-widget').options[x].innerHTML + '</b>';
       // Row 0 is for the headings
       var row = table.insertRow(0);
@@ -307,7 +307,7 @@
          var description = questions_dict[question]['description'];
          var row = table.insertRow(j++);
          row.insertCell(0).innerHTML = "<div style='color:blue;' >"  +
-             "<a target='_blank' class='zmdi zmdi-eye'" + 
+             "<a target='_blank' class='zmdi zmdi-eye'" +
              " href=https://ram8647.appspot.com/mobileCSP/unit?unit=" + unit_id + "&lesson=" + lesson_id + "> " + description + "</a></div>";
          row.insertCell(1).innerHTML = "TBD";
          var k = 2;
@@ -322,7 +322,7 @@
       }
       return table;
    } // def
-    
+
 
   </script>
 {% endblock %}
@@ -346,7 +346,7 @@
 {% endif %}
 {% if students %}
   <script>
-  var studentsArray = '{{ students_json | safe  }}'; 
+  var studentsArray = '{{ students_json | safe  }}';
   var studentsJs = jQuery.parseJSON(studentsArray);
   window.studentsJs = studentsJs;
   </script>
@@ -367,7 +367,7 @@
            <br /><b>Description: {{ section.description }}</b>
           </td>
           <td>
-            You can manage student enrollment here, as well as view an aggregate summary of the progress and performance of the students in this section. 
+            You can manage student enrollment here, as well as view an aggregate summary of the progress and performance of the students in this section.
             Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">instructions and documentation</a>.
           </td>
          </tr>
@@ -391,19 +391,19 @@
         {% if students %}
         <div class="gcb-list gcb-list--autostripe xsrf-token-holder"
              data-status-xsrf-token-teacher-dashboard="{{ status_xsrf_token }}">
-        <table id="buttons-table"> 
+        <table id="buttons-table">
          <tr>
           <td>
            <span class="hover help yui-wk-div" data-id="unitselect"><label><b>Unit: </b></label></span>
            <select id="unit-select-widget"  class="unit-select">
               <option value="course_completion">Course</option>
-              {% if units %} 
+              {% if units %}
                 {% for unit in units %}
                    {% if unit.type == 'U' %}
                          <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
                    {% endif %}
                 {% endfor %}
-              {% endif %} 
+              {% endif %}
           </td>
           <td>
            <span class="hover help yui-wk-div" data-id="lessonselect"><label style="margin-left: 10px;"><b>Lessons: </b></label></span>
@@ -428,7 +428,7 @@
             {% endif %}
            </tr>
           </thead>
-          <tbody> 
+          <tbody>
           {% for student in students %}
             <tr>
              <td>
@@ -454,11 +454,11 @@
              <span id="student-lesson-icon-holder-{{loop.index}}"></span>
              &nbsp;
              <span id="student-lesson-status-holder-{{loop.index}}">N/A</span>
-             </td> 
+             </td>
              {% if has_scores %}
                <td id="student-quizzes-cell-{{loop.index}}">
                  N/A
-               </td> 
+               </td>
              {% endif %}
             </tr>
            {% endfor %}
@@ -493,4 +493,3 @@
 </p>
 {% endif %}
 {% endblock %}
-

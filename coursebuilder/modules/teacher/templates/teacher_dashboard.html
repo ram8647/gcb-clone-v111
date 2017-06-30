@@ -10,7 +10,7 @@
 
 {% block subtitle %}
   {# I18N: Title of the webpage. #}
-  - {{ gettext('Teacher Dashboard') }}
+    {{ gettext('Teacher Dashboard') }}
 {% endblock subtitle %}
 
 {% block assets %}
@@ -33,54 +33,66 @@
     <div class="gcb-aside">
       {% if teacher %}
 	    {% if not disabled %}
-       <table>
+       <table style="width: 80%">
         <tbody>
          <tr>
           <td style="width:70%">
             <h3>Teacher Dashboard</h3>
-             <p>
-               You can manage your student enrollment here, as well as view each student's progress at the course, unit, and lesson level.
-               &nbsp;Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">instructions and documentation</a>.
-             </p>   
+            <p>
+              You can manage your student enrollment here, as well as view each student's progress at the course, unit, and lesson level.
+              &nbsp;Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">instructions and documentation</a>.
+            </p>
           </td>
           <td>
-           <table><tr><td>
-                    (<a target="_blank" href="https://mobilecsp-2017.appspot.com/teach_mobilecsp">Mobile CSP Teacher Site</a>)
-                 </td></tr>
-                 <tr><td>
-		      {% if teacher.is_admin %}
-	   <!--              NOTE: For GET, GCB constructs an action URL that doesn't work.     -->
-	   <!--              <form id='admin-button' action='{{ teacher.add_action }}' method='GET'> -->
-	   <!--                <input type="hidden" name="xsrf_token" value="{{ teacher.add_xsrf_token }}"> -->
-			<form id='admin-button' action='mcsp_admin?action=edit_teachers' method='GET'>
-			  <input type="hidden" name="action" value="edit_teachers">
-			  <button class="gcb-button gcb-button-action gcb-button-author" type="submit">Admin: Add Teacher</button>
-			</form>
-			 <div style='clear: both; padding-top: 2px;' ></div>
-		      {% endif %}
-                  </td></tr>
+            <table>
+              <tr>
+                <td>
+                  (<a target="_blank" href="https://mobilecsp-2017.appspot.com/teach_mobilecsp">Mobile CSP Teacher Site</a>)
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+		                {% if teacher.is_admin %}
+          	    <!--              NOTE: For GET, GCB constructs an action URL that doesn't work.     -->
+          	    <!--              <form id='admin-button' action='{{ teacher.add_action }}' method='GET'> -->
+          	    <!--                <input type="hidden" name="xsrf_token" value="{{ teacher.add_xsrf_token }}"> -->
+          			<form id='admin-button' action='mcsp_admin?action=edit_teachers' method='GET'>
+          			  <input type="hidden" name="action" value="edit_teachers">
+          			  <button class="gcb-button gcb-button-action gcb-button-author" type="submit">Admin: Add Teacher</button>
+          			</form>
+
+                <div style='clear: both; padding-top: 2px;' ></div>
+		              {% endif %}
+
+                </td>
+              </tr>
            </table>
           </td>
          </tr>
         </tbody>
        </table>
-        <table id="buttons-table"> 
+
+       <table id="buttons-table">
          <tr>
-          <td>
-            <!-- RAM?? HACK the 'name' and 'value' from the hidden element are inserted as the action 
-                       when the button is clicked.  It probably should be like the commented-out lines. 
-                       We want the Url to be:  teacher?action=add_section                       -->
+           <td>
+            <!-- RAM?? HACK the 'name' and 'value' from the hidden element are inserted as the action
+            when the button is clicked.  It probably should be like the commented-out lines.
+            We want the Url to be:  teacher?action=add_section                       -->
+
             <form id='add-section-button' action='teacher?action=add_section'  method='GET'>
-             <input type="hidden" name="action" value="add_section">
-             <button class="gcb-button" type="submit">+ Create New Section</button>
-<!--              NOTE: For GET, GCB constructs an action URL that doesn't work.     -->
+              <input type="hidden" name="action" value="add_section">
+              <button class="gcb-button" type="submit">+ Create New Section</button>
+<!--          NOTE: For GET, GCB constructs an action URL that doesn't work.     -->
 <!--             <form id='add-section-button' action='{{ teacher.add_section }}' method='GET'> -->
 <!--             <input type="hidden" name="xsrf_token" value="{{ teacher.newsection_xsrf_token }}"> -->
-           </form>
-           <div style='clear: both; padding-top: 2px;'></div>
+            </form>
+
+            <div style='clear: both; padding-top: 2px;'></div>
           </td>
-         </tr>
-         </table>
+        </tr>
+      </table>
+
         {% if teacher.sections %}
         <div class="gcb-list gcb-list--autostripe xsrf-token-holder"
              data-status-xsrf-token-teacher-dashboard="{{ status_xsrf_token }}">
@@ -111,35 +123,35 @@
                <a href="teacher?action=edit_section&key={{ item.key }}" class="zmdi zmdi-edit"></a>
 <!--                <a href="teacher?action=edit_section&key={{ item.key }}" class="gcb-list__icon gcb-list__iconrowhover material-icons"></a> -->
              </td>
-             <td style="width:70%;">
+             <td style="width:70%">
                <a href="{{item.edit_action}}">
-                  {{item.name}} &nbsp;&nbsp; {{item.acadyr}} &nbsp;&nbsp; {{item.description}} &nbsp;&nbsp; 
-               <script>
-                 (function() {
-                   function pad(num) {
-                     return (num < 10 ? '0' : '') + num;
-                   }
-                   var date = new Date({{ item.date }});
-                   var year = date.getFullYear();
-                   var month = pad(date.getMonth() + 1);
-                   var day = pad(date.getDate());
-                   var dateString = year + '-' + month + '-' + day;
-                   document.write(dateString);
-                 })();
-               </script>
+                 {{item.name}} &nbsp;&nbsp; {{item.acadyr}} &nbsp;&nbsp; {{item.description}} &nbsp;&nbsp;
+                 <script>
+                   (function() {
+                     function pad(num) {
+                       return (num < 10 ? '0' : '') + num;
+                     }
+                     var date = new Date({{ item.date }});
+                     var year = date.getFullYear();
+                     var month = pad(date.getMonth() + 1);
+                     var day = pad(date.getDate());
+                     var dateString = year + '-' + month + '-' + day;
+                     document.write(dateString);
+                   })();
+                 </script>
                </a>
              </td>
              <td>
                {% if item.delete_action %}
                 <form id='gcb-delete-section-{{ loop.index0 }}' action='{{ item.delete_action }}' method='POST'>
                   <input type="hidden" name="xsrf_token" value="{{ item.delete_xsrf_token }}">
-                   <button class="zmdi zmdi-delete" type="submit" 
-                     onclick='return confirm("Are you sure you want to delete this section?");'></button> 
+                   <button class="zmdi zmdi-delete" type="submit"
+                     onclick='return confirm("Are you sure you want to delete this section?");'></button>
 <!--                    <button class="material-icons gcb-list__icon gcb-list__iconrowhover" type="submit"  -->
 <!--                      onclick='return confirm("Are you sure you want to delete this section?");'>delete</button>  -->
-                </form> 
-               {% endif %} 
-             </td> 
+                </form>
+               {% endif %}
+             </td>
             </tr>
           {% endfor %}
           </tbody>
@@ -155,20 +167,21 @@
 {# I18N: Shown if the user is not registered for the dashboard. #}
 
 	    <div style="font-size:12px; width:95%">
-	    <p>
-The Teacher Dashboard is only available to teachers who have been
-registered to use it. It provides teachers a tool to monitor the performance of their students. 
-	    Instructions for registering for the Teacher Dashboard are posted to the Teaching Mobile CSP Forum. 
-	    If you have not yet joined the Teaching Mobile CSP forum, please go 
-<a href="https://mobilecsp-2017.appspot.com/teach_mobilecsp/unit?unit=1&lesson=39">here</a> 
-to sign up. 
-		    </p>
+  	    <p>
+          The Teacher Dashboard is only available to teachers who have been
+          registered to use it. It provides teachers a tool to monitor the performance of their students.
+  	      Instructions for registering for the Teacher Dashboard are posted to the Teaching Mobile CSP Forum.
+  	      If you have not yet joined the Teaching Mobile CSP forum, please go
+          <a href="https://mobilecsp-2017.appspot.com/teach_mobilecsp/unit?unit=1&lesson=39">here</a>
+          to sign up.
+  		  </p>
 	    </div>
+
 {% endif %} <!-- if teacher -->
-        
-   
+
+
       </div>
     </div>
 </div>
- 
+
 {% endblock %}
