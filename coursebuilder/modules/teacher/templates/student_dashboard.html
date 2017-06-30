@@ -10,20 +10,20 @@
 
 {% block subtitle %}
   {# I18N: Title of the webpage. #}
-  - {{ gettext('Progress Details for {{ student_email }}') }}
+    {{ gettext('Progress Details for ') }} {{ student_email }}
 {% endblock subtitle %}
 
 {% block assets %}
   {{ super() }}
   <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/student_progress.css" />
-  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css" /> 
+  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css" />
   <link rel="stylesheet" type="text/css" href="assets/lib/lessons/tipped.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
-  <style> 
-  .complete{background-color: #ccffcc;} 
-  .inprogress{background-color: #ccddcc;} 
-  .notstarted{background-color: #ccaacc;} 
-  .issue{background-color: #ffaacc;} 
+  <style>
+  .complete{background-color: #ccffcc;}
+  .inprogress{background-color: #ccddcc;}
+  .notstarted{background-color: #ccaacc;}
+  .issue{background-color: #ffaacc;}
   </style>
   <style>
   .tooltip {
@@ -72,8 +72,8 @@
       // Initilize the modal window -- is this used?
       setUpModalWindow();
     });
-  
-    var documentation = { 
+
+    var documentation = {
        "course-completion": "Displays the percentage of the course (units and lessons) completed by this student.",
        "unit-completion": "When a unit is selected, displays the percentage of that unit completed by the student.",
        "unitselect": "Select a unit to see the lessons within the unit. Then click on a lesson.",
@@ -104,7 +104,7 @@
           document.getElementById('lessons-table-headings').style.visibility='hidden';  // Hide headings with hovers
         } else {
           document.getElementById('lessons-table-headings').style.visibility='visible'; // Display headings with hovers
-          document.getElementById('student-unit-completion').innerHTML = '<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>' 
+          document.getElementById('student-unit-completion').innerHTML = '<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>'
             + studentJs['progress_dict']['unit_completion'][this.value] + ' %';
           document.getElementById('progress-unit-completion').value = studentJs['progress_dict']['unit_completion'][this.value] / 100;
           document.getElementById('progress-unit-completion').width = studentJs['progress_dict']['unit_completion'][this.value] / 100;
@@ -136,7 +136,7 @@
            var progress = studentJs['progress_dict']['lessons_progress'][uid][lid];   // 0, 1, or 2
            var progress_bar = progress / 2;
            var innerHtml = ""
-           if (progress == 2) 
+           if (progress == 2)
              innerHtml = 'Completed';
            else if (progress == 1)
              innerHtml = 'In progress';
@@ -145,7 +145,7 @@
            var progressHTML = "<progress class=student-course-progress value=" + progress_bar + ">";
            progressHTML += "<div class=progress-bar>";
            progressHTML += "<span style=width:" + progress_bar + " ;></span></div></progress>";
-           cell.innerHTML = innerHtml + "<br>" + progressHTML; 
+           cell.innerHTML = innerHtml + "<br>" + progressHTML;
            cell = row.insertCell(2);
            cell.style.width="10%; color:blue;";
            var score_ratio = get_lesson_progress(uid, lid);
@@ -196,7 +196,7 @@
 
 {% if student %}
   <script>
-  var studentDict = '{{ studentJs | safe  }}'; 
+  var studentDict = '{{ studentJs | safe  }}';
   var studentJs = jQuery.parseJSON(studentDict);
   </script>
 {% endif %}
@@ -263,7 +263,7 @@
     }
 
     /*
-     * Creates an n x 6 HTML table for a given lesson of n questions 
+     * Creates an n x 6 HTML table for a given lesson of n questions
      *  where each column consists of the question-id, the number
      *  of attempts, the student's score, and several descriptors for the
      *  question, including type, description, and quizly_name.
@@ -294,8 +294,8 @@
         var qname = attempts_array[i][5];
 
         // InnerHTML stores specifics about the question and supports a tooltip.
-        cell.innerHTML = "<div style='color:blue;' class='"  + md_class_name + "' id='Q" + id + "' uid='" 
-                          + unit_id + "' lid='" + lesson_id + "' type='" + type + "' qname='" + qname + "'></div>" + 
+        cell.innerHTML = "<div style='color:blue;' class='"  + md_class_name + "' id='Q" + id + "' uid='"
+                          + unit_id + "' lid='" + lesson_id + "' type='" + type + "' qname='" + qname + "'></div>" +
              " <div class='tooltip'  > Q" + (i+1) + "<span class='tooltiptext'>" + desc + "</span></div";
 
         var el = document.getElementById("Q" + id);
@@ -312,7 +312,7 @@
                url: ''
              };
              $('#question-preview').html($('<iframe />').attr(
-               {src: 'teacher?' + $.param(params)})).show(); 
+               {src: 'teacher?' + $.param(params)})).show();
            };
         } else {
             el.onclick = function() {
@@ -322,11 +322,11 @@
               var params = {
                 action: 'question_preview',
                 quid: 0,                      // Quizly quiz
-                url: "https://ram8647.appspot.com/mobileCSP/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname=" 
+                url: "https://ram8647.appspot.com/mobileCSP/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname="
                       + this.getAttribute('qname')
               };
               $('#question-preview').html($('<iframe />').attr(
-                 {src: 'teacher?' + $.param(params)})).show(); 
+                 {src: 'teacher?' + $.param(params)})).show();
             };
         } // else
       } // for
@@ -364,20 +364,20 @@
      */
     function get_lesson_progress(unit_id, lesson_id) {
       var score_ratio = 'N/A';
-      if (studentJs['scores'][unit_id] && studentJs['scores'][unit_id][lesson_id]) 
+      if (studentJs['scores'][unit_id] && studentJs['scores'][unit_id][lesson_id])
           score_ratio = studentJs['scores'][unit_id][lesson_id]['ratio'];
       return score_ratio;
     }
-    
-    /* 
+
+    /*
      * Handler for lesson selector. Displays a table of score quiz attempts and scores
-     * 
+     *
      * @param unit_id the id number of the unit
      * @param lesson_id the id number of the lesson
      */
     function handle_lesson_selection(unit_id, lesson_id) {
 
-      // Remove existing tables 
+      // Remove existing tables
       var tables = document.getElementsByClassName('question-attempts');
       for (var i = 0; i < tables.length; i++) {
         while(tables[i].firstChild) {
@@ -411,7 +411,7 @@
     <h2>Progress Details for Student {{ student.name }} (<span class="student-name">{{ student_email }})</span></h2>
    </td>
    <td>
-     <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()" >Back to Roster</button>   
+     <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()" >Back to Roster</button>
    </td>
   </tr>
   <tr>
@@ -442,7 +442,7 @@
          </td>
          <td>&nbsp;&nbsp;</td>
          <td>
-          <span class="hover help yui-wk-div" data-id="unit-completion"><label id="student-unit-completion"><b>Unit Completion: </b>N/A</label></span> 
+          <span class="hover help yui-wk-div" data-id="unit-completion"><label id="student-unit-completion"><b>Unit Completion: </b>N/A</label></span>
         </td>
         <td>
           <progress id="progress-unit-completion" class="student-unit-progress" value="0">
@@ -469,13 +469,13 @@
            <span class="hover help yui-wk-div" data-id="unitselect"><label><b>Select a Unit: </b></label></span>
            <select id="unit-select-widget"  class="unit-select">
               <option value="course_completion">Course</option>
-              {% if units %} 
+              {% if units %}
                 {% for unit in units %}
                    {% if unit.type == 'U' %}
                          <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
                    {% endif %}
                 {% endfor %}
-              {% endif %} 
+              {% endif %}
           </td>
       </tr>
     </table>
