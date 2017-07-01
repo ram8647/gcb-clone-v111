@@ -2,7 +2,7 @@
 
 {% macro render_sub_element(sub_element, can_see_drafts) %}
   {% if sub_element.is_active %}
-    {% set outer_element_class = 'active' %}
+    {% set outer_element_class = 'active gcb-last-location' %}
   {% else %}
     {% set outer_element_class = '' %}
   {% endif %}

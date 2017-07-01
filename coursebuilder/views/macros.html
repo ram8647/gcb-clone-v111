@@ -40,9 +40,12 @@
                                 inner_element_class,
                                 suppress_link=False,
                                 suppress_description=False) %}
+
+  {#
   {% if outline_element.link_is_last_page_visited %}
     {% set outer_element_class = outer_element_class + ' gcb-last-location' %}
   {% endif %}
+  #}
 
   <{{ outer_element_tag }} class="{{ outer_element_class|trim }}">
     <{{ inner_element_tag }} class="{{ inner_element_class|trim }}">
