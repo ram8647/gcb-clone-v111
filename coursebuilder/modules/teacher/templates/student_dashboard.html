@@ -17,41 +17,9 @@
   {{ super() }}
   <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/student_progress.css" />
   <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css" />
+  <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/teacher.css" />
   <link rel="stylesheet" type="text/css" href="assets/lib/lessons/tipped.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
-  <style>
-  .complete{background-color: #ccffcc;}
-  .inprogress{background-color: #ccddcc;}
-  .notstarted{background-color: #ccaacc;}
-  .issue{background-color: #ffaacc;}
-  </style>
-  <style>
-  .tooltip {
-      position: relative;
-      display: inline-block;
-      border-bottom: 1px dotted black;
-  }
-
-  .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 120px;
-      background-color: black;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px 0;
-
-      /* Position the tooltip */
-      position: absolute;
-      z-index: 1;
-      top: -5px;
-      right: 105%;
-  }
-
-  .tooltip:hover .tooltiptext {
-      visibility: visible;
-  }
-  </style>
 
   <script type="text/javascript" src="/modules/teacher/resources/js/modal-window.js"></script>
   <script src="assets/lib/lessons/tipped.js"></script>
@@ -98,18 +66,19 @@
         // Update the student table with data for the selected unit
         var newOptions = [];
         if (this.value == 'course_completion') {
-          document.getElementById('student-unit-completion').innerHTML = '<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>' + 'N/A';
-          document.getElementById('progress-unit-completion').value = 0;
-          document.getElementById('progress-unit-completion').width = 0;
-          document.getElementById('lessons-table-headings').style.visibility='hidden';  // Hide headings with hovers
+          $('#student-unit-completion').html('<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>' + 'N/A');
+          $('#progress-unit-completion').attr({'value': 0, 'width': 0});
+          $('#lessons-table-headings').css('visibility', 'hidden');  // Hide headings with hovers
         } else {
-          document.getElementById('lessons-table-headings').style.visibility='visible'; // Display headings with hovers
-          document.getElementById('student-unit-completion').innerHTML = '<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>'
-            + studentJs['progress_dict']['unit_completion'][this.value] + ' %';
-          document.getElementById('progress-unit-completion').value = studentJs['progress_dict']['unit_completion'][this.value] / 100;
-          document.getElementById('progress-unit-completion').width = studentJs['progress_dict']['unit_completion'][this.value] / 100;
+          var unitCompletion = studentJs['progress_dict']['unit_completion'][this.value];
+          $('#lessons-table-headings').css('visibility', 'visible'); // Display headings with hovers
+          $('#student-unit-completion').html('<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>'
+            + unitCompletion + ' %');
+          $('#progress-unit-completion').attr('val', unitCompletion / 100);
+          $('#progress-unit-completion').attr('width', unitCompletion / 100);
+
           var lessons = lessonsObject[this.value];
-          for (var i =0; i < lessons.length; i++) {
+          for (var i = 0; i < lessons.length; i++) {
             newOptions.push({
               key: lessons[i].lesson_id,
               value: lessons[i].title
@@ -130,7 +99,7 @@
            row = table.insertRow(k);
            cell = row.insertCell(0);
            cell.style.width="25%";
-           cell.innerHTML="<a target='_blank' href='https://ram8647.appspot.com/mobileCSP/unit?unit=" + uid + "&lesson=" + lid + "'>" + lessons[k]['title']   + "</a>";
+           cell.innerHTML="<a target='_blank' href='/mobilecsp/unit?unit=" + uid + "&lesson=" + lid + "'>" + lessons[k]['title']   + "</a>";
            cell = row.insertCell(1);
            cell.style.width="15%";
            var progress = studentJs['progress_dict']['lessons_progress'][uid][lid];   // 0, 1, or 2
@@ -196,7 +165,7 @@
 
 {% if student %}
   <script>
-  var studentDict = '{{ studentJs | safe  }}';
+  var studentDict = '{{ studentJs | safe }}';
   var studentJs = jQuery.parseJSON(studentDict);
   </script>
 {% endif %}
@@ -214,7 +183,7 @@
      * @param attempts an array of the number of student attempts at a question
      * @return An array of the form [id, attempts, score, type, desc, quizlyname] for each question.
      */
-    function createQuestionsAttemptsArray(questions, attempts) {
+     function createQuestionsAttemptsArray(questions, attempts) {
         var question_attempts = [];
         for (var key in questions) {
           if (key == 'ratio')
@@ -237,7 +206,7 @@
             question_attempts.push([id, 0, score, type, desc, quizly_name]);
           }
         }
-	return question_attempts;
+      return question_attempts;
     }
 
 
@@ -251,15 +220,9 @@
      * @return a array of the student's scores for the questions in given lessons
      */
     function getQuestionScoresForStudentByLesson(studentId, unitId, lessonId, scores) {
-	var questions = [];
-	if (scores) {
-	    if (scores[unitId]) {
-		if (scores[unitId][lessonId]) {
-		    questions = scores[unitId][lessonId];
-		}
-	    }
-	}
-	return questions;
+      return (scores && scores[unitId] && scores[unitId][lessonId])
+        ? scores[unitId][lessonId]
+        : [];
     }
 
     /*
@@ -302,7 +265,7 @@
         el.setAttribute('quid', id);
         var type = el.getAttribute('type');
         if (type != 'Quizly') {
-	   el.onclick = function() {  // Open a modal iframe to display the question
+	         el.onclick = function() {  // Open a modal iframe to display the question
              openModal();
              modal = document.getElementById('question-preview');
              modal.style.visibility = 'visible';
@@ -322,7 +285,7 @@
               var params = {
                 action: 'question_preview',
                 quid: 0,                      // Quizly quiz
-                url: "https://ram8647.appspot.com/mobileCSP/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname="
+                url: "/mobilecsp/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname="
                       + this.getAttribute('qname')
               };
               $('#question-preview').html($('<iframe />').attr(

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 """ Classes and methods to create and manage the Teacher Dashboard.
-    Based off of the announcements module, which was created by 
-    saifu@google.com.   
+    Based off of the announcements module, which was created by
+    saifu@google.com.
 """
 
 __author__ = 'Saifu Angto (saifu@google.com)'
@@ -97,7 +97,7 @@ class TeacherHandlerMixin(object):
     def format_admin_template(self, items):
         """ Formats the template for the Admin 'Add Teacher' page.
 
-            When clicked the 'Admin: Add Teacher button opens up 
+            When clicked the 'Admin: Add Teacher button opens up
             a list of teachers plus and 'Add Teacher' button.
         """
         template_items = []
@@ -139,7 +139,7 @@ class TeacherHandlerMixin(object):
 
             This is the page that registered teachers will see.  It consists of
             list of the teacher's course sections and buttons to manage the
-            sections. 
+            sections.
         """
         template_sections = []
         if sections:
@@ -166,7 +166,7 @@ class TeacherHandlerMixin(object):
                     section['delete_action'] = self.get_dashboard_action_url(
                         TeacherDashboardHandler.DELETE_SECTION_ACTION,
                         key=section['key'])
-                    template_sections.append(section) 
+                    template_sections.append(section)
 
         output = {}
         output['sections'] = template_sections
@@ -214,7 +214,7 @@ class TeacherDashboardHandler(
 
     # Not sure what these do?  May be expendable?
     default_action = 'edit_sections'
-    get_actions = [default_action, LIST_SECTION_ACTION, EDIT_SECTION_ACTION, 
+    get_actions = [default_action, LIST_SECTION_ACTION, EDIT_SECTION_ACTION,
                    ADD_SECTION_ACTION, DISPLAY_ROSTER_ACTION, STUDENT_DASHBOARD_ACTION, PREVIEW_QUESTION]
     post_actions = [DELETE_SECTION_ACTION]
 
@@ -230,7 +230,7 @@ class TeacherDashboardHandler(
             if teacher.email == user_email:
                 return True
         return False
-    
+
     def _render(self):
         """ Renders the TEACHERS_TEMPLATE by calling super.render(template)
 
@@ -261,10 +261,10 @@ class TeacherDashboardHandler(
         self.template_value['navbar'] = {'teacher': True}
         self.render(template)
 
-    
+
     def get_question_preview(self):
         """
-            Provides a preview of quiz questions. 
+            Provides a preview of quiz questions.
 
             Invoked from student_dashboard.  The question is displayed in a modal
             window that is initialized in modal-window.js.
@@ -306,7 +306,7 @@ class TeacherDashboardHandler(
         if not users.get_current_user():
             alerts.append('Access denied. Only registered teachers can use this feature.')
             disable = True
-        else:        
+        else:
             user_email = users.get_current_user().email()
             if not self.is_registered_teacher(user_email):
                 alerts.append('Access denied. Please see a course admin.')
@@ -332,14 +332,14 @@ class TeacherDashboardHandler(
     def get_add_section(self):
         """ Shows an editor for a section entity.
 
-            This callback method is triggered when the user clicks on the 
+            This callback method is triggered when the user clicks on the
             'Create New Section' button in the Teacher splach page.
         """
         if not TeacherRights.can_add_section(self):
             self.error(401)
             return
 
-        if GLOBAL_DEBUG: 
+        if GLOBAL_DEBUG:
             logging.debug('***RAM** get_add_section')
         entity = CourseSectionEntity.make('', '', '', True)
         entity.put()
@@ -407,9 +407,9 @@ class TeacherDashboardHandler(
                     'lesson_id': lesson.lesson_id
                 })
             lessons[unit.unit_id] = unit_lessons_filtered
-        
+
         # Convert to JSON
-        return transforms.dumps(lessons, {}) 
+        return transforms.dumps(lessons, {})
 
     def calculate_lessons_progress(self, lessons_progress):
         """ Returns a dict summarizing student progress on the lessons in each unit."""
@@ -430,13 +430,13 @@ class TeacherDashboardHandler(
         if GLOBAL_DEBUG:
             logging.debug('***RAM*** calc lessons = ' + str(lessons))
         return lessons
-                            
+
     def calculate_student_progress_data(self, student, course, tracker, units):
         """ Returns a dict that summarizes student progress for course, units, and lessons.
 
            The dict takes the form: {'course_progress': c, 'unit_completion': u, 'lessons_progress': p}
            where 'course_progress' is a number giving the overall percentage of lessons completed
-           as calculated by GCB, 'unit_completion' gives the completion percentage of each unit, 
+           as calculated by GCB, 'unit_completion' gives the completion percentage of each unit,
            as calculated by GCB, and 'lessons_progress', gives a summary of the lesson progress
            for each unit, as calculated by us.
         """
@@ -460,7 +460,7 @@ class TeacherDashboardHandler(
             course_progress += value
         course_progress = str(round(course_progress / len(unit_progress_data) * 100,2))
 
-        # Progress on each lesson in the coure -- a tuple-index dict:  dict[(unitid,lessonid)] 
+        # Progress on each lesson in the coure -- a tuple-index dict:  dict[(unitid,lessonid)]
         units_lessons_progress = {}
         for unit in units:
             if GLOBAL_DEBUG:
@@ -483,12 +483,12 @@ class TeacherDashboardHandler(
         scores = ActivityScoreParser.get_activity_scores([student.user_id], course, True)
         if GLOBAL_DEBUG:
             logging.debug('***RAM*** get activity scores ' + str(scores))
-      
+
         return scores
 
-    def calculate_performance_ratio(self, aggregate_scores, email): 
+    def calculate_performance_ratio(self, aggregate_scores, email):
         if email not in aggregate_scores.keys():
-            return aggregate_scores         
+            return aggregate_scores
         scores = aggregate_scores[email]
         for unit in scores:
             for lesson in scores[unit]:
@@ -517,8 +517,8 @@ class TeacherDashboardHandler(
         return student_dict
 
     def create_student_data_table(self, course, section, tracker, units, student_email = None):
-        """ Creates a lookup table containing all student progress data 
-            for every unit, lesson, and quiz. 
+        """ Creates a lookup table containing all student progress data
+            for every unit, lesson, and quiz.
         """
         # If called from get_student_dashboad to get stats for a single student
         if student_email:
@@ -541,10 +541,10 @@ class TeacherDashboardHandler(
         return students
 
     def get_display_roster(self):
-        """Callback method to display the Roster view. 
+        """Callback method to display the Roster view.
 
-           This is called when the user clicks on the 'View Roster' button  
-           from the main Teacher Dashboard page.  It displays all students 
+           This is called when the user clicks on the 'View Roster' button
+           from the main Teacher Dashboard page.  It displays all students
            in a single course section and their progress in the course.
            Also allows the teacher to manage the section.
         """
@@ -562,7 +562,7 @@ class TeacherDashboardHandler(
         # And lessons
         lessons = self.get_lessons_for_roster(units_filtered, this_course)
 
-        # Get students and progress data for this section 
+        # Get students and progress data for this section
         students = self.create_student_data_table(this_course, course_section, tracker, units_filtered)
 
         if GLOBAL_DEBUG:
@@ -574,16 +574,16 @@ class TeacherDashboardHandler(
         self.template_value['resources_path'] = RESOURCES_PATH
         self.template_value['section'] = { 'key': key, 'teacher': user_email, 'name' : course_section.name, 'description' : course_section.description }
         self.template_value['units'] = units_filtered
-        self.template_value['lessons'] = lessons 
+        self.template_value['lessons'] = lessons
         self.template_value['students'] = students
         self.template_value['students_json'] = transforms.dumps(students, {})  # for use with javascript
 
         self._render_roster()
 
     def get_student_dashboard(self):
-        """Callback method to display details of the student performance. 
+        """Callback method to display details of the student performance.
 
-           This is called when the user clicks on the 'View Dashboard' button  
+           This is called when the user clicks on the 'View Dashboard' button
            from the Section Roster page.  It displays details for all
            units and lessons.
         """
@@ -603,8 +603,8 @@ class TeacherDashboardHandler(
             logging.debug('***RAM*** Student : ' + str(student_dict))
         self.template_value['student'] = student_dict
         self.template_value['studentJs'] = transforms.dumps(student_dict, {}) # for use with javascript
-       
-       
+
+
         self._render_student_dashboard()
 
 class AdminDashboardHandler(TeacherHandlerMixin, dashboard.DashboardHandler):
@@ -782,6 +782,7 @@ def register_module():
       (RESOURCES_PATH + '/css/question_preview.css', tags.ResourcesHandler),
       (RESOURCES_PATH + '/css/student_progress.css', tags.ResourcesHandler),
       (RESOURCES_PATH + '/css/tipped.css', tags.ResourcesHandler),
+      (RESOURCES_PATH + '/css/teacher.css', tags.ResourcesHandler),
     ]
 
     dashboard.DashboardHandler.add_sub_nav_mapping(

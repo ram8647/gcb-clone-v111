@@ -17,6 +17,7 @@
   {{ super() }}
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
    <link rel="stylesheet" href="/static/material-design-icons/css/material-design-iconic-font.min.css">
+   <link rel="stylesheet" href="/modules/teacher/resources/css/teacher.css">
    <script src="//storage.googleapis.com/code.getmdl.io/1.0.0/material.min.js"></script>
    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.0/material.teal-indigo.min.css">
    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
@@ -33,8 +34,7 @@
     <div class="gcb-aside">
       {% if teacher %}
 	    {% if not disabled %}
-       <table style="width: 80%">
-        <tbody>
+       <table>
          <tr>
           <td style="width:70%">
             <h3>Teacher Dashboard</h3>
@@ -70,7 +70,6 @@
            </table>
           </td>
          </tr>
-        </tbody>
        </table>
 
        <table id="buttons-table">
@@ -106,7 +105,6 @@
             <th class="gcb-list__cell--icon"></th>
            </tr>
           </thead>
-          <tbody>
           {% for item in teacher.sections %}
             <tr>
              <td>
@@ -154,7 +152,6 @@
              </td>
             </tr>
           {% endfor %}
-          </tbody>
          </table>
 	    </div>
         {% else %}
