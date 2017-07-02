@@ -108,19 +108,19 @@ function getRandomPermutation(size, random) {
 
 /**
  * Mobile CSP CUSTOMIZATION.
- * 
+ *
  * Displays the appropriate blue dot as soon as the submit button is clicked.
- * This is called from this file.  A corresponding function is included
+ * This is called from this file. A corresponding function is included
  * in quizly.py.
- */ 
+ */
 function updateProgressIcon(question, score) {
-  console.log('RAM updateProgressIcon score= ' + score);
+  //console.log('RAM updateProgressIcon score= ' + score);
   var id = question.id;
   var div = document.getElementById(id);
   //  var iconholder = div.previousSibling.previousSibling;
   var iconholder = div.previousSibling.previousElementSibling;
   var innerHtml = '';
-  if (score == 1) 
+  if (score == 1)
     innerHtml = '<img alt="Completed" class="gcb-progress-icon" src="assets/img/completed.png" title="Completed">';
   else
     innerHtml = '<img alt="In_progress" class="gcb-progress-icon" src="assets/img/in_progress.png" title="In progress">';
