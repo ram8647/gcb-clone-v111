@@ -177,7 +177,7 @@ class QuestionTag(tags.BaseTag):
         # Getting previous answers for that question
         previous_answer = []
 
-        if handler.student:
+        if (hasattr(handler, 'student')):
             dd = StudentAnswersEntity.get_answers_dict_for_student(handler.student)
             dict = dd['answers']
 
