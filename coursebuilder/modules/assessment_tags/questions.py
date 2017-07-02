@@ -19,6 +19,7 @@ __author__ = 'sll@google.com (Sean Lip)'
 import base64
 import logging
 import os
+import json
 
 import jinja2
 
@@ -31,12 +32,15 @@ from models import models as m_models
 from models import resources_display
 from models import transforms
 
+from google.appengine.ext import db
+from modules.teacher.student_answers import StudentAnswersEntity
+
 RESOURCES_PATH = '/modules/assessment_tags/resources'
 
 
 @appengine_config.timeandlog('render_question', duration_only=True)
 def render_question(
-    quid, instanceid, embedded=False, weight=None, progress=None):
+    quid, instanceid, embedded=False, weight=None, progress=None, previous_answer=[]):
     """Generates the HTML for a question.
 
     Args:
@@ -79,6 +83,8 @@ def render_question(
     template_values['resources_path'] = RESOURCES_PATH
     if progress is not None:
         template_values['progress'] = progress
+
+    template_values['previous_answer'] = previous_answer
 
     template_file = None
     js_data = {
@@ -168,9 +174,25 @@ class QuestionTag(tags.BaseTag):
                     handler.student, handler.unit_id, handler.lesson_id,
                     instanceid)
 
+        # Getting previous answers for that question
+        previous_answer = []
+
+        if handler.student:
+            dd = StudentAnswersEntity.get_answers_dict_for_student(handler.student)
+            dict = dd['answers']
+
+            unit = str(handler.unit_id)
+            lesson = str(handler.lesson_id)
+
+            if unit in dict:
+                if lesson in dict[unit]:
+                    if instanceid in dict[unit][lesson]:
+                        previous_answer = dict[unit][lesson][instanceid]['answers']
+
         html_string = render_question(
             quid, instanceid, embedded=False, weight=weight,
-            progress=progress)
+            progress=progress, previous_answer=previous_answer)
+
         return tags.html_string_to_element_tree(html_string)
 
     def get_schema(self, handler):
