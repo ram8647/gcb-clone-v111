@@ -152,21 +152,21 @@
 
 {% if student_email %}
   <script>
-  var student_email = '{{ student_email }}';
+    var student_email = '{{ student_email }}';
   </script>
 {% endif %}
 
 {% if lessons %}
   <script>
-  var lessonsJson = '{{ lessons|safe }}';
-  var lessonsObject = jQuery.parseJSON(lessonsJson);
+    var lessonsJson = '{{ lessons|safe }}';
+    var lessonsObject = jQuery.parseJSON(lessonsJson);
   </script>
 {% endif %}
 
 {% if student %}
   <script>
-  var studentDict = '{{ studentJs | safe }}';
-  var studentJs = jQuery.parseJSON(studentDict);
+    var studentDict = '{{ studentJs | safe }}';
+    var studentJs = jQuery.parseJSON(studentDict);
   </script>
 {% endif %}
 
@@ -251,7 +251,7 @@
         var id = attempts_array[i][0];
 
         // Make a unique class name for each clickable icon -- icons from material design, see link above
-        var md_class_name = "zmdi zmdi-" + id + " zmdi-eye";
+        var md_class_name = "zmdi zmdi-eye zmdi-" + id;
         var type = attempts_array[i][3];
         var desc = attempts_array[i][4];
         var qname = attempts_array[i][5];
@@ -272,6 +272,7 @@
              var params = {
                action: 'question_preview',
                quid: this.getAttribute('quid'),
+               student_email: student_email,
                url: ''
              };
              $('#question-preview').html($('<iframe />').attr(
@@ -310,7 +311,7 @@
       row = table.insertRow(2);
       cell = row.insertCell(0);
       cell.innerHTML = "Scores";
-      for (var i= 0; i < attempts_array.length; i++) {
+      for (var i = 0; i < attempts_array.length; i++) {
         var cell = row.insertCell(i+1);
         cell.innerHTML = attempts_array[i][2];
         if (attempts_array[i][2] != 1 && attempts_array[i][1] > 0) {
@@ -326,10 +327,9 @@
      * Retrieves the lesson progress as a ratio of correct answers / number of questions.
      */
     function get_lesson_progress(unit_id, lesson_id) {
-      var score_ratio = 'N/A';
-      if (studentJs['scores'][unit_id] && studentJs['scores'][unit_id][lesson_id])
-          score_ratio = studentJs['scores'][unit_id][lesson_id]['ratio'];
-      return score_ratio;
+      return (studentJs['scores'][unit_id] && studentJs['scores'][unit_id][lesson_id])
+            ? studentJs['scores'][unit_id][lesson_id]['ratio']
+            : 'N/A';
     }
 
     /*

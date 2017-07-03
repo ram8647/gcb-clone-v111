@@ -266,7 +266,7 @@ class TeacherDashboardHandler(
         """
             Provides a preview of quiz questions.
 
-            Invoked from student_dashboard.  The question is displayed in a modal
+            Invoked from student_dashboard. The question is displayed in a modal
             window that is initialized in modal-window.js.
 
             This is an adaptation of the question_preview used by the dashboard module.
@@ -276,9 +276,9 @@ class TeacherDashboardHandler(
         self.template_value['navbar'] = {'teacher': True}
         self.template_value['resources_path'] = RESOURCES_PATH
         url = self.request.get('url')
-        if url ==  '':
+        if url == '':
             self.template_value['question'] = tags.html_to_safe_dom(
-                '<question quid="{}">'.format(self.request.get('quid')), self)
+                '<question quid="{}" student_email="{}">'.format(self.request.get('quid'), self.request.get('student_email')), self)
         else:
             self.template_value['url'] = url
             self.template_value['question'] = 'Quizly'
@@ -584,7 +584,7 @@ class TeacherDashboardHandler(
         """Callback method to display details of the student performance.
 
            This is called when the user clicks on the 'View Dashboard' button
-           from the Section Roster page.  It displays details for all
+           from the Section Roster page. It displays details for all
            units and lessons.
         """
         student_email = self.request.get('student')

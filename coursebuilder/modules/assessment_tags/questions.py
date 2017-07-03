@@ -163,8 +163,8 @@ class QuestionTag(tags.BaseTag):
 
         quid = node.attrib.get('quid')
         weight = node.attrib.get('weight')
-
-        instanceid = node.attrib.get('instanceid')
+        instanceid = node.attrib.get('instanceid')  # is not set for question_preview in teacher student dashboard
+        student_email = node.attrib.get('student_email')
 
         progress = None
         if (hasattr(handler, 'student') and not handler.student.is_transient
@@ -189,6 +189,27 @@ class QuestionTag(tags.BaseTag):
                     if instanceid in dict[unit][lesson]:
                         previous_answer = dict[unit][lesson][instanceid]['answers']
 
+        elif student_email:
+            key = db.Key.from_path('StudentAnswersEntity', student_email)
+            student = db.get(key)
+            dd = StudentAnswersEntity.get_answers_dict_for_student(student)
+            dict = dd['answers']
+
+            # iterate through all answered questions to find the one
+            cont = True
+            for unit in dict:
+                if not cont:
+                    break
+                for lesson in dict[unit]:
+                    if not cont:
+                        break
+                    for iid in dict[unit][lesson]:
+                        if not cont:
+                            break
+                        if (dict[unit][lesson][iid]['question_id'] == quid):
+                            previous_answer = dict[unit][lesson][iid]['answers']
+                            cont = False
+
         html_string = render_question(
             quid, instanceid, embedded=False, weight=weight,
             progress=progress, previous_answer=previous_answer)
@@ -204,6 +225,8 @@ class QuestionTag(tags.BaseTag):
                 'quid', 'Question', 'string', optional=True, i18n=False))
             reg.add_property(schema_fields.SchemaField(
                 'weight', 'Weight', 'number', optional=True, i18n=False))
+            reg.add_property(schema_fields.SchemaField(
+                'student_email', 'Student', 'string', optional=True, i18n=False))
             return reg
 
         reg.add_property(schema_fields.SchemaField(
@@ -212,6 +235,8 @@ class QuestionTag(tags.BaseTag):
             'qu_type', None, 'string', hidden=True, optional=True, i18n=False))
         reg.add_property(schema_fields.SchemaField(
             'weight', None, 'number', hidden=True, optional=True, i18n=False))
+        reg.add_property(schema_fields.SchemaField(
+            'student_email', None, 'string', hidden=True, optional=True, i18n=False))
 
         select_schema = schema_fields.FieldRegistry(
             'Select',

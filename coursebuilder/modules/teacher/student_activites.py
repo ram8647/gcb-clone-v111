@@ -40,10 +40,10 @@ class ActivityScoreParser(jobs.MapReduceJob):
         self.activity_scores = { }
         self.params = {}
         self.num_attempts_dict = { }
-       
+
         # This is a table of all the Quizly exercises currently in the course.  It is used to provide a
-        #  description in the Student Dashboard and also to validate that an instance_id is still 
-        #  currently valid. 
+        #  description in the Student Dashboard and also to validate that an instance_id is still
+        #  currently valid.
         self.quizly_desc = {               # instance_id:description
             'LXgF4NO50hNM':{'desc':'Quizly, Pause the Player','name':'quiz_pause_the_player'},       # Unit 2
             'BtQ8hSoGkeml':{'desc':'Quizly, Stop the Player','name':'quiz_button_click_stop_player'},
@@ -57,12 +57,12 @@ class ActivityScoreParser(jobs.MapReduceJob):
             '8T30OkUf5r1r':{'desc':'Quizly, Simple if/else','name':'quiz_simple_if_else'},
             'KQctST8skmaC':{'desc':'Quizly, Procedure to double a variable','name':'quiz_proc_double'},
             'v2m4Ks25S1MX':{'desc':'Quizly, Procedure to add globals','name':'quiz_add_globals'},
-            'rCgLbJRceEbn':{'desc':'Quizly, Procedure to reset the score','name':'quiz_reset_score'},     # Unit 4   
+            'rCgLbJRceEbn':{'desc':'Quizly, Procedure to reset the score','name':'quiz_reset_score'},     # Unit 4
             '7uowepixSjT4':{'desc':'Quizly, Procedure to calculate the hit rate','name':'quiz_calculate_hit_rate'},
             'w18q4UWKxvlM':{'desc':'Quizly, Fix a bug in updateScore procedure','name':'quiz_procedure_bug'},
             'rvjUJMaLZ56s':{'desc':'Quizly, If/else greater than','name':'quiz_if_x_greater_than_y'},
             'scgF2VSCjUv8':{'desc':'Quizly, Simple if/else','name':'quiz_simple_if_else'},    # Unit 5
-            'JatcV7u6GOer':{'desc':'Quizly, If x greater than y','name':'quiz_if_x_greater_than_y'},   
+            'JatcV7u6GOer':{'desc':'Quizly, If x greater than y','name':'quiz_if_x_greater_than_y'},
             #  No Quizly exercises beyond Unit 5 -->   we should create more!
         }
 
@@ -79,7 +79,7 @@ class ActivityScoreParser(jobs.MapReduceJob):
 
     @classmethod
     def _get_questions_by_question_id(cls, questions_by_usage_id):
-        ''' Retrieves every question in the course returning 
+        ''' Retrieves every question in the course returning
             them in a dict:  { id:questionDAO, ... }
 
             @param questions_by_usage_id.values() is a dict:
@@ -310,7 +310,7 @@ class ActivityScoreParser(jobs.MapReduceJob):
 
             # Add the score to right lesson
             # NOTE: This was throwing an exception on Quizly exercises.  Shouldn't happen now
-            try: 
+            try:
                 #  If the event is tag-assessment and has no quid, it's a Quizly exercise
                 if not 'quid' in data:
                     self.parse_quizly_scores(data, instance_id, timestamp, student, student_answers)
@@ -318,7 +318,7 @@ class ActivityScoreParser(jobs.MapReduceJob):
                     self.parse_question_scores(instance_id, questions, student_answers, answers, student, timestamp)
             except Exception as e:
                 logging.error('***********RAM************** bad instance_id: %s %s\n%s', str(instance_id), e, traceback.format_exc())
-        if GLOBAL_DEBUG:       
+        if GLOBAL_DEBUG:
             logging.debug('***RAM*** activity_scores ' + str(self.activity_scores))
         return self.activity_scores
 
@@ -411,7 +411,7 @@ class ActivityScoreParser(jobs.MapReduceJob):
         else:
             if GLOBAL_DEBUG:
                 logging.debug('***RAM*** Updating dict for ' +
-                    str(question_answer['unit_id']) + ' ' + str(question_answer['lesson_id']) + ' ' + str(question_answer['sequence']) 
+                    str(question_answer['unit_id']) + ' ' + str(question_answer['lesson_id']) + ' ' + str(question_answer['sequence'])
                     + ' score=' + str(question_answer['score']))
             question_answer_dict = {}
             question_answer_dict['unit_id'] = question_answer['unit_id']
@@ -475,7 +475,7 @@ class ActivityScoreParser(jobs.MapReduceJob):
 
            For each student, launch a Query of EventEntities to retrieve student
            scores.  The Query is launched as a map-reduce background process that
-           will return up to 500 results, reporting back every second.  It reports
+           will return up to 500 results, reporting back every second. It reports
            back by calling the map_fn callback, which in turn calls parse_activity
            scores.
 
@@ -484,8 +484,8 @@ class ActivityScoreParser(jobs.MapReduceJob):
            that will be updated as score data for that student is received.
 
            Events properties include a userid (a number) and a source (e.g.,
-           tag-assessement), a  recorded-on date (timestamp) and data (a dictionary).
-           Here's a typeical data dict:
+           tag-assessement), a recorded-on date (timestamp) and data (a dictionary).
+           Here's a typical data dict:
 
            {"loc": {"city": "mililani", "language": "en-US,en;q=0.8", "locale": "en_US",
            "country": "US", "region": "hi", "long": -158.01528099999999, "lat": 21.451331,
@@ -533,7 +533,7 @@ class ActivityScoreParser(jobs.MapReduceJob):
                 cached_student_data['date'] = cached_date
 
                 student = Student.get_by_user_id(user_id)
-                
+
                 cached_student_data['scores'] = activityParser.activity_scores.get(student.email, {})
                 cached_student_data['attempts'] = activityParser.num_attempts_dict.get(student.email, {})
                 MemcacheManager.set(cls._memcache_key_for_student(student.email),cached_student_data)

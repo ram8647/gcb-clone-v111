@@ -12,7 +12,7 @@
 var ESC_KEY = 27;
 
 function setUpModalWindow() {
-  console.log('Setting up modal');
+  //console.log('Setting up modal');
   // Bind click on background and on close button to close window
   $("#question-background, #modal-window .gcb-button").on("click", function(e) {
     closeModal();
@@ -36,7 +36,7 @@ function openModal() {
 function closeModal() {
   $("#modal-window, #question-container > div").hide();
   //Remove Esc binding
-  console.log('Closing modal');
+  //console.log('Closing modal');
   $("#student-detail-section").css('opacity', '1');
   $(document).off("keyup.modal");
 }

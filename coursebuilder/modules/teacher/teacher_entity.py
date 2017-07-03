@@ -35,7 +35,7 @@ from models.models import Student
 # In our module
 import messages
 
-GLOBAL_DEBUG = False
+GLOBAL_DEBUG = True
 
 class TeacherEntity(entities.BaseEntity):
 
@@ -148,7 +148,7 @@ class TeacherItemRESTHandler(utils.BaseRESTHandler):
     @classmethod
     def SCHEMA(cls):
         """
-           SCHEMA used to display Entity form in oeditor.  
+           SCHEMA used to display Entity form in oeditor.
 
            The 'mode' field is used to distinguish between
            adding and editing an Entity.
@@ -159,8 +159,8 @@ class TeacherItemRESTHandler(utils.BaseRESTHandler):
                 'className': 'inputEx-Group new-form-layout'})
         schema.add_property(schema_fields.SchemaField(
             'key', 'ID', 'string', editable=False, hidden=True))
-        schema.add_property(schema_fields.SchemaField(          
-            'mode', 'Mode', 'string', editable=False, hidden=True)) 
+        schema.add_property(schema_fields.SchemaField(
+            'mode', 'Mode', 'string', editable=False, hidden=True))
         schema.add_property(schema_fields.SchemaField(
             'name', 'Name', 'string',
             description=messages.TEACHER_NAME_DESCRIPTION))
@@ -301,5 +301,3 @@ class TeacherItemRESTHandler(utils.BaseRESTHandler):
         entity.delete()
 
         transforms.send_json_response(self, 200, 'Deleted.')
-
-
