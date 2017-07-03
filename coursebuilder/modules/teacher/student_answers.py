@@ -208,17 +208,23 @@ class StudentAnswersEntity(entities.BaseEntity):
                    'attempts': 1, 'question_type': type, 'timestamp': timestamp,
                    # Not sure whether the rest are needed
                    'weighted_score': 1, 'lesson_id': lesson_id, 'unit_id': unit_id, 'possible_points': 1,
-                   'tallied': False,
+                   'tallied': False, 'ever_completed': False
                  }
+        if (score == 1):
+            attempt['ever_completed'] = True
+
         if answers == 'true' or answers == 'false':   # Quizly answers, put into an array
             attempt['answers'] = [ answers ]
         if GLOBAL_DEBUG:
             logging.debug('***RAM*** Quizly answers = ' + str(answers) + ' a= '  + str(attempt['answers']))
+
+        # Create new answers_dict
         if not answers_dict:
             answers_dict = {}
             lesson = {instance_id: attempt }
             unit = {lesson_id: lesson }
             answers_dict = {unit_id: unit }
+        # Update existing answers_dict
         else:
             if unit_id in answers_dict:
                 if lesson_id in answers_dict[unit_id]:
@@ -226,6 +232,8 @@ class StudentAnswersEntity(entities.BaseEntity):
                         answers_dict[unit_id][lesson_id][instance_id]['attempts'] += 1
                         answers_dict[unit_id][lesson_id][instance_id]['answers'] = answers
                         answers_dict[unit_id][lesson_id][instance_id]['score'] = score
+                        if (score == 1):
+                            answers_dict[unit_id][lesson_id][instance_id]['ever_completed'] = True
                     else:
                         answers_dict[unit_id][lesson_id][instance_id] = attempt
                 else:
