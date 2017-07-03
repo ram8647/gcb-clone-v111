@@ -221,6 +221,9 @@ class KhanExerciseTag(tags.BaseTag):
 </div>""" % (
     cgi.escape(caption), 'khan-exercises/embed.js?static:%s' % name))
 
+    def get_icon_url(self):
+        return '/mobilecsp/assets/img/khanexicon.png'
+
     def get_schema(self, unused_handler):
         """Make schema with a list of all exercises by inspecting a zip file."""
         zip_file = zipfile.ZipFile(ZIP_FILE)
