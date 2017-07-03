@@ -232,6 +232,9 @@ class QuizlyExerciseTag(tags.BaseTag):
 
         return tags.html_string_to_element_tree(returnStr)
 
+    def get_icon_url(self):
+        return '/mobilecsp/assets/img/quizly-gcb-edit-icon.png'
+
     def get_schema(self, unused_handler):
         """Construct a list of quiz names and desciptions"""
         items = []
@@ -274,13 +277,13 @@ class QuizlyExerciseTag(tags.BaseTag):
             schema_fields.SchemaField(
                 'height', 'Height', 'string',
                 optional=True,
-                extra_schema_dict_values={'value': '595'},
+                extra_schema_dict_values={'value': ''},
                 description=('Height of the iframe')))
         reg.add_property(
             schema_fields.SchemaField(
                 'width', 'Width', 'string',
                 optional=True,
-                extra_schema_dict_values={'value': '755'},
+                extra_schema_dict_values={'value': '100%'},
                 description=('Width of the iframe')))
         return reg
 
