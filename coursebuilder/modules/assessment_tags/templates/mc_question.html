@@ -22,7 +22,11 @@
           <input type="{{button_type}}"
               name="{{instanceid}}"
               id="{{instanceid}}.{{loop.index0}}"
-              data-index="{{loop.index0}}"/>
+              data-index="{{loop.index0}}"
+              {% if loop.index0 in previous_answer %}
+                checked
+              {% endif %}
+              />
           <label for="{{instanceid}}.{{loop.index0}}">
             {{ choice['text'] | gcb_tags }}
           </label>

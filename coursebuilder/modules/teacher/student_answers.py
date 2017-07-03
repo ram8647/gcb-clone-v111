@@ -17,7 +17,7 @@
 import datetime
 import logging
 import json
-import random 
+import random
 import copy
 
 from google.appengine.ext import db
@@ -45,23 +45,23 @@ class StudentAnswersEntity(entities.BaseEntity):
     """A class that represents a persistent database entity for student answers."""
     recorded_on = db.DateTimeProperty(auto_now_add=True, indexed=True)
     user_id = db.StringProperty(indexed=True)
-    email = db.StringProperty(indexed=True) 
+    email = db.StringProperty(indexed=True)
     answers_dict = db.TextProperty(indexed=False)   #json string
-    
+
     memcache_key = 'studentanswers'
 
     @classmethod
     def record(cls, user, data):
         """Records a student tag-assessment into a datastore.
-  
+
            A tag-assessment includes a student attempt at a quiz question.
-           The user's email is used as the key for the StudentAnswersEntity. 
+           The user's email is used as the key for the StudentAnswersEntity.
 
            Initially an randomly generated numeric id was used as the key
-           for StudentAnswersEntity.  That made it difficult to lookup 
+           for StudentAnswersEntity.  That made it difficult to lookup
            student data from the datastore without having to perform a
-           very expensive query. So, we switched to an email-based key, which 
-           lets us retrieve a single record from the db with a key.get(). 
+           very expensive query. So, we switched to an email-based key, which
+           lets us retrieve a single record from the db with a key.get().
 
            However, the datastore already had a couple of thousand records
            in it and we were unable to revise it.  So this code works with
@@ -71,14 +71,14 @@ class StudentAnswersEntity(entities.BaseEntity):
               First try to get the Entity using the student's key.  If
               that succeeds then proceed with updating the answers_dict.
               If that fails, then try getting the Entity using a query
-              on the student's email (expensive).  If that succeeds, 
-              create a new Entity as a copy of the existing one with 
+              on the student's email (expensive).  If that succeeds,
+              create a new Entity as a copy of the existing one with
               the email as its key.  If that fails, then this is the
-              occurrence for the student -- make a new Entity. 
+              occurrence for the student -- make a new Entity.
 
           For some students this will leave 2 Entities with the
           same email. However, only the entity with the email-based
-          key is updated. 
+          key is updated.
 
           We will eventually delete all numeric-based keys.
         """
@@ -89,7 +89,7 @@ class StudentAnswersEntity(entities.BaseEntity):
             logging.debug('***RAM*** email ' + email + ' key = ' + str(key))
         student = db.get(key)
 
-        if student: 
+        if student:
             #  If student (with email key) found
             if GLOBAL_DEBUG:
                 logging.warning('***RAM*** existing student key =  ' + email)
@@ -97,7 +97,7 @@ class StudentAnswersEntity(entities.BaseEntity):
             student.recorded_on = datetime.datetime.now()
             student.put()
         else:
-            # Try to query the db by email to get student       
+            # Try to query the db by email to get student
             student = cls.get_student_by_email(email, user)
             if student:
                 if GLOBAL_DEBUG:
@@ -105,7 +105,7 @@ class StudentAnswersEntity(entities.BaseEntity):
                 student.answers_dict = cls.update_answers_dict(student, data, user)
                 student.recorded_on = datetime.datetime.now()
                 student.put()
-            else:           
+            else:
                 # No student with that email in Db -- create a new Entity
                 if GLOBAL_DEBUG:
                     logging.warning('***RAM*** creating new ' + email)
@@ -113,25 +113,25 @@ class StudentAnswersEntity(entities.BaseEntity):
                 dict = cls.update_answers_dict(None, data, user)
                 student.answers_dict = dict
                 student.user_id = user.user_id()
-                student.email = user.email() 
+                student.email = user.email()
                 student.put()
 
     @classmethod
     def get_student_by_email(cls, email, user):
         if GLOBAL_DEBUG:
             logging.warning('***RAM*** get by email ' + email)
-        
+
         # Fetch the student by query on the email
         # If no hit, return None which will cause a new Entity
         student = cls.all().filter('email',email).get()
         if not student:
             if GLOBAL_DEBUG:
                 logging.warning('***RAM***  no hit for email ' + email)
-            return None 
+            return None
         else:
             # Here were are converting the student's answers entity
             # from using an integer key to using the email as key.
-            # THis will make retrievals way more efficient. 
+            # THis will make retrievals way more efficient.
             if GLOBAL_DEBUG:
                 logging.warning('***RAM*** creating new ' + email)
             new_student = cls(key_name = email)
@@ -162,7 +162,7 @@ class StudentAnswersEntity(entities.BaseEntity):
            record of the students scores and attempts for questions and Quizly
            exercises.
 
-           POLICY: The score recorded is the last score recorded.  So if a
+           POLICY: The score recorded is the last score recorded. So if a
            student gets a question correct and then redoes it and gets it wrong,
            the wrong answer and score of 0 is what would be recorded here.
            Should this be changed?
@@ -178,7 +178,7 @@ class StudentAnswersEntity(entities.BaseEntity):
         else:
              answers = [False]           # An array b/c of multi choice with multiple correct answers
         score = data_json['score']
-        type = data_json['type']
+        mytype = data_json['type']
         quid = None
         if 'quid' in data_json:          # Regular (not Quizly) question
             quid = data_json['quid']
@@ -186,10 +186,10 @@ class StudentAnswersEntity(entities.BaseEntity):
             dict = {}
             dict['email'] = user.email()
             dict['user_id'] = user.user_id()
-            dict['answers'] = cls.build_answers_dict(None, unit_id, lesson_id, instance_id, quid, answers, score, type)
+            dict['answers'] = cls.build_answers_dict(None, unit_id, lesson_id, instance_id, quid, answers, score, mytype)
         else:
             answers_dict = dict['answers']
-            dict['answers'] = cls.build_answers_dict(answers_dict, unit_id, lesson_id, instance_id, quid, answers, score, type)
+            dict['answers'] = cls.build_answers_dict(answers_dict, unit_id, lesson_id, instance_id, quid, answers, score, mytype)
         return dict
 
     @classmethod
@@ -199,19 +199,19 @@ class StudentAnswersEntity(entities.BaseEntity):
             Takes the form:
             answers = {unit_id: {lesson_id: {instance_id: {<answer data>}}}}
 
-            The rest of the data -- e.g., sequence,choices -- has to be computed when the data 
+            The rest of the data -- e.g., sequence,choices -- has to be computed when the data
             are sent to the client.
         """
 
         timestamp = int((datetime.datetime.now() - datetime.datetime(1970, 1, 1)).total_seconds())
-        attempt = {'question_id': quid, 'answers': answers, 'score': score, 
-                   'attempts': 1, 'question_type':type, 'timestamp': timestamp,
+        attempt = {'question_id': quid, 'answers': answers, 'score': score,
+                   'attempts': 1, 'question_type': type, 'timestamp': timestamp,
                    # Not sure whether the rest are needed
-                   'weighted_score': 1, 'lesson_id': lesson_id, 'unit_id': unit_id, 'possible_points': 1, 
+                   'weighted_score': 1, 'lesson_id': lesson_id, 'unit_id': unit_id, 'possible_points': 1,
                    'tallied': False,
                  }
         if answers == 'true' or answers == 'false':   # Quizly answers, put into an array
-            attempt['answers'] = [ answers ]          
+            attempt['answers'] = [ answers ]
         if GLOBAL_DEBUG:
             logging.debug('***RAM*** Quizly answers = ' + str(answers) + ' a= '  + str(attempt['answers']))
         if not answers_dict:
@@ -224,6 +224,7 @@ class StudentAnswersEntity(entities.BaseEntity):
                 if lesson_id in answers_dict[unit_id]:
                     if instance_id in answers_dict[unit_id][lesson_id]:
                         answers_dict[unit_id][lesson_id][instance_id]['attempts'] += 1
+                        answers_dict[unit_id][lesson_id][instance_id]['answers'] = answers
                         answers_dict[unit_id][lesson_id][instance_id]['score'] = score
                     else:
                         answers_dict[unit_id][lesson_id][instance_id] = attempt
@@ -261,4 +262,3 @@ class StudentAnswersEntity(entities.BaseEntity):
         """Do the normal delete() and invalidate memcache."""
         super(StudentAnswersEntity, self).delete()
         MemcacheManager.delete(self.memcache_key)
-
