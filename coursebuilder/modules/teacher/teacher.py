@@ -778,6 +778,7 @@ def register_module():
     # These are necessary to access the js and css resources.
     global_routes = [
       (RESOURCES_PATH + '/js/modal-window.js', tags.ResourcesHandler),
+      (RESOURCES_PATH + '/js/string-format.js', tags.ResourcesHandler),
       (RESOURCES_PATH + '/js/tipped.js', tags.ResourcesHandler),
       (RESOURCES_PATH + '/css/question_preview.css', tags.ResourcesHandler),
       (RESOURCES_PATH + '/css/student_progress.css', tags.ResourcesHandler),

@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
 
   <script type="text/javascript" src="/modules/teacher/resources/js/modal-window.js"></script>
+  <script type="text/javascript" src="/modules/teacher/resources/js/string-format.js"></script>
   <script src="assets/lib/lessons/tipped.js"></script>
 
   <script>
@@ -122,7 +123,7 @@
            cell.className = md_class_name;
            cell.setAttribute('unit_id', uid);
            cell.setAttribute('lesson_id', lid);
-           cell.innerHTML = "<div unit_id=" + uid + " lesson_id=" + lid + " id=lesson-completion-" + lid + " class='lesson-completion'>" + score_ratio + " </div>";
+           cell.innerHTML = "<div unit_id={0} lesson_id={1} id=lesson-completion-{2} class='lesson-completion'>{3}</div>".format(uid, lid, lid, score_ratio);
            cell = row.insertCell(3);
            cell.style.width="50%";
            cell.innerHTML = "<table id=question-attempts-" + lid + " class='question-attempts'> </table>";
@@ -257,9 +258,9 @@
         var qname = attempts_array[i][5];
 
         // InnerHTML stores specifics about the question and supports a tooltip.
-        cell.innerHTML = "<div style='color:blue;' class='"  + md_class_name + "' id='Q" + id + "' uid='"
-                          + unit_id + "' lid='" + lesson_id + "' type='" + type + "' qname='" + qname + "'></div>" +
-             " <div class='tooltip'  > Q" + (i+1) + "<span class='tooltiptext'>" + desc + "</span></div";
+        cell.innerHTML = "<div style='color: blue;' class='{0}' id='Q{1}' uid='{2}' \
+          lid='{3}' type='{4}' qname='{5}'></div> <div class='tooltip'> Q{6}<span class='tooltiptext'>{7}</span></div>"
+          .format(md_class_name, id, unit_id, lesson_id, type, qname, (i+1), desc);
 
         var el = document.getElementById("Q" + id);
         el.setAttribute('quid', id);
