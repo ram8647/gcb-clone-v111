@@ -1,10 +1,14 @@
+html {
+  width: calc(100% - 30px) !important;
+}
+
 .zmdi-eye,
 .zmdi-delete {
   cursor: pointer;
 }
 
-html {
-  width: calc(100% - 30px) !important;
+.zmdi-eye:hover {
+  color: #837E7C;
 }
 
 .correct {background-color: #ccffcc;}

@@ -10,6 +10,7 @@
     <script src="assets/lib/activity-generic-1.3.js"></script>
 
     <link rel="stylesheet" type="text/css" href="assets/css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="/modules/teacher/resources/css/question_preview.css"/>
 
     <style type="text/css">
       html, body, .gcb-aside {
@@ -43,7 +44,7 @@
   <body>
     <div data-scored="False" data-question-batch-id="Preview" class="gcb-aside">
     {% if question == 'Quizly' %}
-      <div style="border:1px solid black; text-align: center; vertical-align:middle;">
+      <div class="quizly-question-preview">
         <h2>Quizly Exercise</h2>
         <br><br>
         <h3>Click <a href={{ url }}>here</a> to open the exercise.</h3>
