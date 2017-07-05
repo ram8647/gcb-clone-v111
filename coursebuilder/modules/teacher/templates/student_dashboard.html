@@ -91,6 +91,8 @@
         var lessons = lessonsObject[this.value];
         $('#lessons-table').empty();
 
+        if (!lessons) return;
+
         for (var k = 0; k < lessons.length; k++) {
           var lid = lessons[k]['lesson_id'];
           var uid = lessons[k]['unit_id'];
@@ -137,18 +139,6 @@
           handle_lesson_selection($(this).attr('unit_id'), $(this).attr('lesson_id'));
         });
 
-        // Add click handlers to the titles -- hasClass is defined above
-        // The else clause handles a <span> inside a <div> that contains unit_id and lesson_id
-        /*
-        document.addEventListener('click', function (e) {
-          if (hasClass(e.target, 'lesson-completion')) {
-            handle_lesson_selection(e.target.getAttribute('unit_id'), e.target.getAttribute('lesson_id'));
-         } else if (hasClass(e.target, 'zmdi-eye'))
-            if (e.target.hasAttribute('lesson_id')) {
-              handle_lesson_selection(e.target.getAttribute('unit_id'), e.target.getAttribute('lesson_id'));
-            }
-        }, false);
-        */
       });
     });
   </script>
