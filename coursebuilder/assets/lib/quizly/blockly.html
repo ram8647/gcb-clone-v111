@@ -18,7 +18,14 @@
   <script type="text/javascript" src="./all_blockly.js"></script>
   <script type="text/javascript" src="./all_appinv.js"></script>
   <script type="text/javascript" src="./all_quizly.js"></script>
+
+  <!-- Because plovr renames functions and variables, which causes 
+       eval(fn) to fail for evaluating function problems, we include
+       quizme-helper.js separately from the rest of Quizly code. -->
   <script type="text/javascript" src="./quizme-helper.js"></script>
+
+<!-- Not to document whey this is not needed for GCB. -->
+<!--   <script type="text/javascript" src="./jquery-1.9.1.min.js"></script> -->
 
   <style>
     html, body {

@@ -40,24 +40,38 @@
 
 <script>
 // Based on: https://www.developphp.com/video/JavaScript/Custom-Alert-Box-Programming-Tutorial
+// The variable doc is set based on where the dialogoverlay, which varies if index.html is embedded.
 function JavaScriptAlert(){
     this.render = function(dialog){
         var winW = window.innerWidth;
         var winH = window.innerHeight;
         var dialogoverlay = window.parent.document.getElementById('dialogoverlay');
-        var dialogbox = window.parent.document.getElementById('dialogbox');
+        var doc;
+        if (dialogoverlay) {
+           doc = window.parent.document;
+        } else {
+           doc = window.document;  // For embedded cases
+        }
+        dialogoverlay = doc.getElementById('dialogoverlay');
+        var dialogbox = doc.getElementById('dialogbox');
         dialogoverlay.style.display = "block";
         dialogoverlay.style.height = winH+"px";
         dialogbox.style.left = winW - 550 +"px";
         dialogbox.style.top = "100px";
         dialogbox.style.display = "block";
-        window.parent.document.getElementById('dialogboxhead').innerHTML = "Javascript Code";
-        window.parent.document.getElementById('dialogboxbody').innerHTML = "<pre>" + dialog + "</pre>";
-        window.parent.document.getElementById('dialogboxfoot').innerHTML = '<button onclick="Alert.ok()">OK</button>';
+        doc.getElementById('dialogboxhead').innerHTML = "Javascript Code";
+        doc.getElementById('dialogboxbody').innerHTML = "<pre>" + dialog + "</pre>";
+        doc.getElementById('dialogboxfoot').innerHTML = '<button onclick="Alert.ok()">OK</button>';
     }
     this.ok = function(){
-      window.parent.document.getElementById('dialogbox').style.display = "none";
-      window.parent.document.getElementById('dialogoverlay').style.display = "none";
+      var dialogoverlay = window.parent.document.getElementById('dialogoverlay');
+      if (dialogoverlay) {
+         doc = window.parent.document;
+      } else {
+         doc = window.document;  // For embedded cases
+      }
+      doc.getElementById('dialogbox').style.display = "none";
+      doc.getElementById('dialogoverlay').style.display = "none";
     }
 }
 var Alert = new JavaScriptAlert();
