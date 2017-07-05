@@ -89,48 +89,57 @@
 
         // Display the unit's lessons in a table with clickable lesson titles
         var lessons = lessonsObject[this.value];
-        var el = document.getElementById('lessons-container');
-        var table = document.getElementById('lessons-table');
-        while (table.firstChild) {
-            table.removeChild(table.firstChild);
-        }
+        $('#lessons-table').empty();
+
         for (var k = 0; k < lessons.length; k++) {
-           var lid = lessons[k]['lesson_id'];
-           var uid = lessons[k]['unit_id'];
-           row = table.insertRow(k);
-           cell = row.insertCell(0);
-           cell.style.width="25%";
-           cell.innerHTML="<a target='_blank' href='/mobilecsp/unit?unit=" + uid + "&lesson=" + lid + "'>" + lessons[k]['title']   + "</a>";
-           cell = row.insertCell(1);
-           cell.style.width="15%";
-           var progress = studentJs['progress_dict']['lessons_progress'][uid][lid];   // 0, 1, or 2
-           var progress_bar = progress / 2;
-           var innerHtml = ""
-           if (progress == 2)
-             innerHtml = 'Completed';
-           else if (progress == 1)
-             innerHtml = 'In progress';
-           else
-             innerHtml = 'Not started';
-           var progressHTML = "<progress class=student-course-progress value=" + progress_bar + ">";
-           progressHTML += "<div class=progress-bar>";
-           progressHTML += "<span style=width:" + progress_bar + " ;></span></div></progress>";
-           cell.innerHTML = innerHtml + "<br>" + progressHTML;
-           cell = row.insertCell(2);
-           cell.style.width="10%; color:blue;";
-           var score_ratio = get_lesson_progress(uid, lid);
-           var md_class_name = "zmdi zmdi-" + lid + " zmdi-eye";
-           cell.className = md_class_name;
-           cell.setAttribute('unit_id', uid);
-           cell.setAttribute('lesson_id', lid);
-           cell.innerHTML = "<div unit_id={0} lesson_id={1} id=lesson-completion-{2} class='lesson-completion'>{3}</div>".format(uid, lid, lid, score_ratio);
-           cell = row.insertCell(3);
-           cell.style.width="50%";
-           cell.innerHTML = "<table id=question-attempts-" + lid + " class='question-attempts'> </table>";
+          var lid = lessons[k]['lesson_id'];
+          var uid = lessons[k]['unit_id'];
+          var progress = studentJs['progress_dict']['lessons_progress'][uid][lid];   // 0, 1, or 2
+          var progressBar = progress / 2;
+          var progressStatus = (progress == 2) ? 'Completed' : ((progress == 1) ? 'In progress' : 'Not started');
+          var scoreRatio = get_lesson_progress(uid, lid);
+
+          $('#lessons-table').append(
+            '<tr> \
+              <td class="lessons-table-lesson"> \
+                <a target="_blank" href="/mobilecsp/unit?unit={0}&lesson={1}">{2}</a> \
+              </td> \
+              \
+              <td class="lessons-table-progress"> \
+                {3} <br> \
+                <progress class="student-course-progress" value={4}> \
+                  <div class="progress-bar" \
+                    <span style="width:{5}"></span> \
+                  </div> \
+                </progress> \
+              </td> \
+              \
+              <td class="lessons-table-scores"> \
+                <div class="zmdi zmdi-eye zmdi-{6}" unit_id={7} lesson_id={8}> \
+                  <div id=lesson-completion-{9} class="lesson-completion">{10}</div> \
+                </div> \
+              </td> \
+              \
+              <td class="lessons-table-questions"> \
+                <table id="question-attempts-{11}" class="question-attempts"></table> \
+              </td> \
+            </tr> \
+            '.format(
+              uid, lid, lessons[k]['title'],  // Lessons Title column
+              progressStatus, progressBar, progressBar, // Progress column
+              lid, uid, lid, lid, scoreRatio,  // Scores column
+              lid // Questions column
+            )
+          );
         }
+
+        $('.zmdi-eye').click(function() {
+          handle_lesson_selection($(this).attr('unit_id'), $(this).attr('lesson_id'));
+        });
 
         // Add click handlers to the titles -- hasClass is defined above
         // The else clause handles a <span> inside a <div> that contains unit_id and lesson_id
+        /*
         document.addEventListener('click', function (e) {
           if (hasClass(e.target, 'lesson-completion')) {
             handle_lesson_selection(e.target.getAttribute('unit_id'), e.target.getAttribute('lesson_id'));
@@ -139,6 +148,7 @@
               handle_lesson_selection(e.target.getAttribute('unit_id'), e.target.getAttribute('lesson_id'));
             }
         }, false);
+        */
       });
     });
   </script>
@@ -258,8 +268,8 @@
         var qname = attempts_array[i][5];
 
         // InnerHTML stores specifics about the question and supports a tooltip.
-        cell.innerHTML = "<div style='color: blue;' class='{0}' id='Q{1}' uid='{2}' \
-          lid='{3}' type='{4}' qname='{5}'></div> <div class='tooltip'> Q{6}<span class='tooltiptext'>{7}</span></div>"
+        cell.innerHTML = "<div class='{0}' id='Q{1}' uid='{2}' \
+          lid='{3}' type='{4}' qname='{5}'> <div class='tooltip'> Q{6}<span class='tooltiptext'>{7}</span></div></div>"
           .format(md_class_name, id, unit_id, lesson_id, type, qname, (i+1), desc);
 
         var el = document.getElementById("Q" + id);
@@ -276,7 +286,7 @@
                student_email: student_email,
                url: ''
              };
-             $('#question-preview').html($('<iframe />').attr(
+             $('#question-preview').html($('<iframe>').attr(
                {src: 'teacher?' + $.param(params)})).show();
            };
         } else {
@@ -290,7 +300,7 @@
                 url: "/mobilecsp/assets/lib/quizly/gcb-index.html?backpack=hidden&selector=hidden&quizname="
                       + this.getAttribute('qname')
               };
-              $('#question-preview').html($('<iframe />').attr(
+              $('#question-preview').html($('<iframe>').attr(
                  {src: 'teacher?' + $.param(params)})).show();
             };
         } // else
@@ -368,29 +378,21 @@
 {% endif %}
 
 <div id="student-detail-section" {% if not student_email %} style="display: none;" {% endif %} >
- <table style="width:95%">
- <tbody>
+ <table style="width:100%">
   <tr>
    <td style="width:85%">
     <h2>Progress Details for Student {{ student.name }} (<span class="student-name">{{ student_email }})</span></h2>
+    By selecting a unit and then selecting lessons within units you can see detailed information on this student's progress and performance.
+    Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">additional instructions and documentation</a>.
    </td>
-   <td>
-     <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()" >Back to Roster</button>
-   </td>
-  </tr>
-  <tr>
-   <td>
-     By selecting a unit and then selecting lessons within units you can see detailed information on this student's progress and performance.
-     Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">additional instructions and documentation</a>.
-   </td>
-   <td>
-     &nbsp;
+   <td class="td-button">
+     <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()">Back to Roster</button>
    </td>
   </tr>
- </tbody>
  </table>
-    <div class="student-detail" style="margin: 5px;">
-      <div style="margin: 3px;">
+
+    <div class="student-detail">
+      <div>
        <table>
         <tr>
         <td>
@@ -421,8 +423,7 @@
       </div>
     </div>
 
-    <hr>
-    <table class="student-detail-table gcb-pull-left" style="margin-top: 15px; width: 90%;">
+    <table class="student-detail-table gcb-pull-left">
       <colgroup>
         <col style="width: 30%">
         <col>
@@ -465,7 +466,7 @@
   <div id="question-background"></div>
   <div id="question-container">
     <a style="visibility:hidden; position:absolute; right:5%; bottom:5%; " id="question-close-button" class="gcb-button">Close</a>
-    <div id="question-preview"><iframe  id="question-preview" /></div>
+    <div id="question-preview"><iframe id="question-preview"></iframe></div>
   </div>
 </div>
 {% endblock %}

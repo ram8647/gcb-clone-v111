@@ -42,3 +42,57 @@ html {
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+
+/* Lessons Table in Student Dashboard*/
+#lessons-table {
+  width: 100%;
+}
+
+.lessons-table-lesson {
+  width: 25%;
+}
+
+.lessons-table-progress {
+  width: 15%;
+}
+
+.lessons-table-scores {
+  width: 10%;
+}
+
+.lessons-table-questions {
+  width: 50%;
+}
+
+.question-attempts {
+  width: 100%;
+  text-align: center;
+}
+
+.question-attempts td:first-child {
+  text-align: left;
+  font-weight: bold;
+}
+
+.student-detail {
+  margin: 0;
+}
+
+.student-detail-table {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.student-detail-table td {
+  background: #eee;
+}
+
+#student-detail-section .td-button {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#student-detail-section h2 {
+  margin: 8px 0;
+}
