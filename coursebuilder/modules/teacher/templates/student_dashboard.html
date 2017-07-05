@@ -75,7 +75,7 @@
           $('#lessons-table-headings').css('visibility', 'visible'); // Display headings with hovers
           $('#student-unit-completion').html('<span class="hover help yui-wk-div" data-id="unit-completion"><b>Unit Completion: </b></span>'
             + unitCompletion + ' %');
-          $('#progress-unit-completion').attr('val', unitCompletion / 100);
+          $('#progress-unit-completion').attr('value', unitCompletion / 100);
           $('#progress-unit-completion').attr('width', unitCompletion / 100);
 
           var lessons = lessonsObject[this.value];
@@ -386,7 +386,12 @@
        <table>
         <tr>
         <td>
-          <label class="student-course-completion"><span class="hover help yui-wk-div" data-id="course-completion"><b>Course Completion: </b></span> {{ student.progress_dict.course_progress }} %</label>
+          <label class="student-course-completion">
+            <span class="hover help yui-wk-div" data-id="course-completion">
+              <b>Course Completion: </b>
+            </span>
+            {{ student.progress_dict.course_progress }} %
+          </label>
         </td>
         <td>
           <progress class="student-course-progress" value="{{ student.progress_dict.course_progress|int / 100 }}">
