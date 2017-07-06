@@ -45,8 +45,33 @@ html {
 
 
 /* Lessons Table in Student Dashboard*/
-#lessons-table {
+#student-detail-section table {
   width: 100%;
+}
+
+#student-detail-header-table td:first-child {
+  width: 85%;
+}
+
+#student-detail-header-table div {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+h2 span {
+  color: rgb(77, 91, 118);
+}
+
+#lessons-table-headings,
+#modal-window {
+  visibility: hidden;
+}
+
+#question-close-button {
+  visibility: hidden;
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
 }
 
 .lessons-table-lesson {
@@ -89,6 +114,14 @@ html {
 
 .student-detail {
   margin: 0;
+}
+
+#progress-unit-completion {
+  margin: 0 0 2px 5px;
+}
+
+.student-course-progress {
+  margin: 0 0 2px 5px;
 }
 
 .student-detail-table {

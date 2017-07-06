@@ -368,100 +368,101 @@
 {% endif %}
 
 <div id="student-detail-section" {% if not student_email %} style="display: none;" {% endif %} >
- <table style="width:100%">
-  <tr>
-   <td style="width:85%">
-    <h2>Progress Details for Student {{ student.name }} (<span class="student-name">{{ student_email }})</span></h2>
-    By selecting a unit and then selecting lessons within units you can see detailed information on this student's progress and performance.
-    Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">additional instructions and documentation</a>.
-   </td>
-   <td class="td-button">
-     <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()">Back to Roster</button>
-   </td>
-  </tr>
- </table>
 
-    <div class="student-detail">
-      <div>
-       <table>
-        <tr>
-        <td>
+  <table id="student-detail-header-table">
+    <tr>
+      <td>
+        <h2>Progress Details for Student <span>{{ student.name }} ({{ student_email }})</span></h2>
+
+        <div>
           <label class="student-course-completion">
             <span class="hover help yui-wk-div" data-id="course-completion">
               <b>Course Completion: </b>
             </span>
             {{ student.progress_dict.course_progress }} %
           </label>
-        </td>
-        <td>
+
           <progress class="student-course-progress" value="{{ student.progress_dict.course_progress|int / 100 }}">
             <!-- Browsers that support the progress tag will ignore this div -->
             <div class="progress-bar">
-             <span style="width: {{ student.progress_dict.course_progress|int / 100}} ;"></span>
+             <span style="width: {{ student.progress_dict.course_progress|int / 100 }} ;"></span>
              </div>
           </progress>
-         </td>
-         <td>&nbsp;&nbsp;</td>
-         <td>
-          <span class="hover help yui-wk-div" data-id="unit-completion"><label id="student-unit-completion"><b>Unit Completion: </b>N/A</label></span>
-        </td>
-        <td>
-          <progress id="progress-unit-completion" class="student-unit-progress" value="0">
-            <!-- Browsers that support the progress tag will ignore this div -->
-            <div class="progress-bar">
-             <span style="width: 0%;"></span>
-             </div>
-          </progress>
-        </td>
-       </tr>
-      </table>
-      </div>
-    </div>
+        </div>
 
-    <table class="student-detail-table gcb-pull-left">
-      <colgroup>
-        <col style="width: 30%">
-        <col>
-      </colgroup>
+        <div>
+          By selecting a unit and then selecting lessons within units you can see detailed information on this student's progress and performance.
+          Click here for <a target="_blank" href="https://docs.google.com/document/d/1XKGfVl_tQDGF0JPQFKh-PKiVKkn5Qu3LOZEJEzpjoaY">additional instructions and documentation</a>.
+        </div>
 
-      <tr>
-          <td>
-           <span class="hover help yui-wk-div" data-id="unitselect"><label><b>Select a Unit: </b></label></span>
-           <select id="unit-select-widget"  class="unit-select">
-              <option value="course_completion">Course</option>
-              {% if units %}
-                {% for unit in units %}
-                   {% if unit.type == 'U' %}
-                         <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
-                   {% endif %}
-                {% endfor %}
-              {% endif %}
-          </td>
-      </tr>
-    </table>
+      </td>
 
-    <div id="lessons-container">
-      <table id="lessons-table-headings" style="visibility:hidden; width:100%;">
-       <tr>
-        <th style="width:25%;"><span class="hover help yui-wk-div" data-id="lesson-title">Lesson Title</span></th>
-        <th style="width:15%;"><span class="hover help yui-wk-div" data-id="progress">Progress</span></th>
-        <th style="width:10%;"><span class="hover help yui-wk-div" data-id="scores">Scores</span></th>
-        <th style="width:50%;"><span class="hover help yui-wk-div" data-id="questions">Questions</span></th>
-       </tr>
-      </table>
-      <table id="lessons-table" style="width:100%;">
-      </table>
-    </div>
+      <td class="td-button">
+        <button class="gcb-button" style="align:right;" type="submit" onclick="window.history.back()">Back to Roster</button>
+      </td>
+   </tr>
+  </table>
+
+  <table class="student-detail-table gcb-pull-left">
+    <tr>
+      <td>
+       <span class="hover help yui-wk-div" data-id="unitselect">
+         <label><b>Select a Unit: </b></label>
+       </span>
+
+       <select id="unit-select-widget" class="unit-select">
+          <option value="course_completion">Course</option>
+          {% if units %}
+            {% for unit in units %}
+               {% if unit.type == 'U' %}
+                  <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
+               {% endif %}
+            {% endfor %}
+          {% endif %}
+        </select>
+      </td>
+
+      <td>
+       <span class="hover help yui-wk-div" data-id="unit-completion">
+         <label id="student-unit-completion"><b>Unit Completion: </b>N/A</label>
+       </span>
+
+        <progress id="progress-unit-completion" class="student-unit-progress" value="0">
+          <!-- Browsers that support the progress tag will ignore this div -->
+          <div class="progress-bar">
+            <span style="width: 0%;"></span>
+          </div>
+        </progress>
+      </td>
+
+    </tr>
+  </table>
+
+
+  <table id="lessons-table-headings">
+    <tr>
+      <th style="width:25%;"><span class="hover help yui-wk-div" data-id="lesson-title">Lesson Title</span></th>
+      <th style="width:15%;"><span class="hover help yui-wk-div" data-id="progress">Progress</span></th>
+      <th style="width:10%;"><span class="hover help yui-wk-div" data-id="scores">Scores</span></th>
+      <th style="width:50%;"><span class="hover help yui-wk-div" data-id="questions">Questions</span></th>
+    </tr>
+  </table>
+
+  <table id="lessons-table">
+  </table>
 
 </div>
 
 <!-- Modal window for previewing questions -->
 <!-- Should be outside main div so main div can be opaque background. -->
-<div id="modal-window" style="visibility:hidden;">
+<div id="modal-window">
   <div id="question-background"></div>
   <div id="question-container">
-    <a style="visibility:hidden; position:absolute; right:5%; bottom:5%; " id="question-close-button" class="gcb-button">Close</a>
-    <div id="question-preview"><iframe id="question-preview"></iframe></div>
+    <a id="question-close-button" class="gcb-button">Close</a>
+    <div id="question-preview">
+      <iframe id="question-preview"></iframe>
+    </div>
   </div>
 </div>
+
 {% endblock %}
