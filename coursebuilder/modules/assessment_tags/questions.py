@@ -179,36 +179,38 @@ class QuestionTag(tags.BaseTag):
 
         if (hasattr(handler, 'student')):
             dd = StudentAnswersEntity.get_answers_dict_for_student(handler.student)
-            dict = dd['answers']
+            if 'answers' in dd:
+                dict = dd['answers']
 
-            unit = str(handler.unit_id)
-            lesson = str(handler.lesson_id)
+                unit = str(handler.unit_id)
+                lesson = str(handler.lesson_id)
 
-            if unit in dict:
-                if lesson in dict[unit]:
-                    if instanceid in dict[unit][lesson]:
-                        previous_answer = dict[unit][lesson][instanceid]['answers']
+                if unit in dict:
+                    if lesson in dict[unit]:
+                        if instanceid in dict[unit][lesson]:
+                            previous_answer = dict[unit][lesson][instanceid]['answers']
 
         elif student_email:
             key = db.Key.from_path('StudentAnswersEntity', student_email)
             student = db.get(key)
             dd = StudentAnswersEntity.get_answers_dict_for_student(student)
-            dict = dd['answers']
+            if 'answers' in dd:
+                dict = dd['answers']
 
-            # iterate through all answered questions to find the one
-            cont = True
-            for unit in dict:
-                if not cont:
-                    break
-                for lesson in dict[unit]:
+                # iterate through all answered questions to find the one
+                cont = True
+                for unit in dict:
                     if not cont:
                         break
-                    for iid in dict[unit][lesson]:
+                    for lesson in dict[unit]:
                         if not cont:
                             break
-                        if (dict[unit][lesson][iid]['question_id'] == quid):
-                            previous_answer = dict[unit][lesson][iid]['answers']
-                            cont = False
+                        for iid in dict[unit][lesson]:
+                            if not cont:
+                                break
+                            if (dict[unit][lesson][iid]['question_id'] == quid):
+                                previous_answer = dict[unit][lesson][iid]['answers']
+                                cont = False
 
         html_string = render_question(
             quid, instanceid, embedded=False, weight=weight,

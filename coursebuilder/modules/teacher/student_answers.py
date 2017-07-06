@@ -248,6 +248,9 @@ class StudentAnswersEntity(entities.BaseEntity):
     @classmethod
     def get_answers_dict_for_student(cls, student):
         """ Retrieve the answers dict for a student. """
+        if student.is_transient:
+            return {}
+
         email = student.email
         if GLOBAL_DEBUG:
             logging.warning('***RAM*** get answers dict for student, email = ' + email)
