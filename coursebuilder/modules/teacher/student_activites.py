@@ -61,9 +61,19 @@ class ActivityScoreParser(jobs.MapReduceJob):
             '7uowepixSjT4':{'desc':'Quizly, Procedure to calculate the hit rate','name':'quiz_calculate_hit_rate'},
             'w18q4UWKxvlM':{'desc':'Quizly, Fix a bug in updateScore procedure','name':'quiz_procedure_bug'},
             'rvjUJMaLZ56s':{'desc':'Quizly, If/else greater than','name':'quiz_if_x_greater_than_y'},
-            'scgF2VSCjUv8':{'desc':'Quizly, Simple if/else','name':'quiz_simple_if_else'},    # Unit 5
-            'JatcV7u6GOer':{'desc':'Quizly, If x greater than y','name':'quiz_if_x_greater_than_y'},
-            #  No Quizly exercises beyond Unit 5 -->   we should create more!
+            #  New Quizly exercises 2017 (2 in Unit 5 deleted above that were duplicates)
+            '9DBHdyYShIEF':{'desc': 'Quizly, Loop to make 50 stars', 'name':'quiz_loop_stars'}, # 4.4
+            'mwh8zMGfHdNr':{'desc': 'Quizly, Loop to sum numbers 1 to 10', 'name':'quiz_loop_sum_numbers'}, # 4.5
+            '9W7S36OUhfLG':{'desc': 'Quizly, Loop to sum even numbers 1 to 20', 'name':'quiz_loop_sum_even_numbers'}, # 4.7
+            '9u9jlO8BVx8x':{'desc': 'Quizly, Procedure increment Z', 'name':'quiz_procedure_with_parameter'}, # 5.2
+            'N42cODoOqcPI':{'desc': 'Quizly, Procedure multiply numeric parameters', 'name':'quiz_proc_two_params'}, # 5.2
+            '7S9SfFlGY3Ve':{'desc': 'Quizly, Function hello', 'name':'quiz_hello_function'}, # 5.5
+            'ZDGEnhh0RvmS':{'desc': 'Quizly, Function double(x)', 'name':'quiz_double_function'}, # 5.5
+            '67fSoFebJJbq':{'desc': 'Quizly, Function square(x)', 'name':'quiz_function_square'}, # 5.5
+            'SlYSAMWRzy7u':{'desc': 'Quizly, Loop to compute 2 to the 10th power', 'name':'quiz_loop_2_to_10th_power'}, # 5.6
+            'Ynvr0X7g6yK4':{'desc': 'Quizly, Procedure sum a list', 'name':'quiz_sum_a_list_procedure'}, # 6.3
+            'CMcsWiDTnGiA':{'desc': 'Quizly, Procedure count nonzeros in a list', 'name':'quiz_count_nonzeros_in_list_procedure'}, # 8.4
+            '69MfN6vXmbKL':{'desc': 'Quizly, Procedure convert list to string', 'name':'quiz_convert_list_to_string'} # 8.4            
         }
 
     @staticmethod
