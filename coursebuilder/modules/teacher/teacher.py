@@ -499,42 +499,17 @@ class TeacherDashboardHandler(
                     n_correct += scores[unit][lesson][quest]['score']
                 scores[unit][lesson]['ratio'] = str(n_correct) + "/" + str(n_questions)
         return scores
-    
-    # returning filtered results with just ratio
-    def calculate_just_performance_ratio(self, aggregate_scores, email):
-        if email not in aggregate_scores.keys():
-            return aggregate_scores  # not sure about this
-        scores = aggregate_scores[email]
-        just_ratio_scores = {}
-        for unit in scores:
-            for lesson in scores[unit]:
-                n_questions = 0
-                n_correct = 0
-                for quest in scores[unit][lesson]:
-                    n_questions += 1
-                    n_correct += scores[unit][lesson][quest]['score']
-                scores[unit][lesson]['ratio']  = str(n_correct) + "/" + str(n_questions)
-                just_ratio_scores[unit] = {}
-                just_ratio_scores[unit][lesson] = {}
-                just_ratio_scores[unit][lesson]['ratio'] = scores[unit][lesson]['ratio']
-                if GLOBAL_DEBUG:
-                    logging.debug('***BAH***  ' + str(just_ratio_scores))
-        return just_ratio_scores
 
     def create_student_table(self, email, course, tracker, units, get_scores=False):
         student_dict = {}
         student = Student.get_first_by_email(email)[0]  # returns a tuple
         if student:
             progress_dict = self.calculate_student_progress_data(student,course,tracker,units)
-            
-            scores = self.retrieve_student_scores_and_attempts(email, course)
             if get_scores:
+                scores = self.retrieve_student_scores_and_attempts(email, course)
                 student_dict['attempts'] = scores['attempts']
 #                    student_dict['scores'] = scores['scores']
                 student_dict['scores'] = self.calculate_performance_ratio(scores['scores'], email)
-            # always get ratio, but not attempts
-            else:
-                student_dict['scores'] = self.calculate_just_performance_ratio(scores['scores'], email)
             student_dict['name'] = student.name
             student_dict['email'] = student.email
             student_dict['progress_dict'] = progress_dict
@@ -545,7 +520,7 @@ class TeacherDashboardHandler(
         """ Creates a lookup table containing all student progress data
             for every unit, lesson, and quiz.
         """
-        # If called from get_student_dashboard to get stats for a single student
+        # If called from get_student_dashboad to get stats for a single student
         if student_email:
             return self.create_student_table(student_email, course, tracker, units, get_scores=True)
 
@@ -560,7 +535,7 @@ class TeacherDashboardHandler(
         students = []
         if len(index) > 0:
             for email in index:
-                student_dict = self.create_student_table(email, course, tracker, units, get_scores=False) 
+                student_dict = self.create_student_table(email, course, tracker, units, get_scores=False)
                 if student_dict:
                     students.append(student_dict)
         return students

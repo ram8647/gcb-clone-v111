@@ -89,14 +89,15 @@
      */
     function get_quiz_ratio(student, unit, lesson) {
       var ratio = "N/A";
+      {% if has_scores %}
       if (student['scores'][unit]) {
         if (student['scores'][unit][lesson]) {
           ratio = student['scores'][unit][lesson]['ratio'];
         }
       }
+      {% endif %}
       return ratio;
     }
-
 
     /*
      * Fills in student performance and progress data for a given unit and lesson
@@ -114,11 +115,10 @@
          var lesson_cell = document.getElementById('student-lesson-status-holder-' + (i+1));
          var lesson_icon = document.getElementById('student-lesson-icon-holder-' + (i+1));  // icon
          var quizzes_cell = document.getElementById('student-quizzes-cell-' + (i+1));
-        {# {% if has_scores %} #}
+         {% if has_scores %}
            var quiz_ratio = get_quiz_ratio(student, unit_id,lesson_id);
            quizzes_cell.innerHTML = quiz_ratio;
-           // console.log("Quiz Ratio " + quiz_ratio);
-       {#  {% endif %} #}
+         {% endif %}
          if (unit_id != 'course_completion') {
            var unit_completion = student['progress_dict']['unit_completion'][unit_id];
            unit_cell.innerHTML = unit_completion;
@@ -160,7 +160,7 @@
     $(function() {
       $('.unit-select').change(function() {
         clear_questions_table(document.getElementById('questions-table'));
-        var unit_num = $('#unit-select-widget').prop('selectedIndex'); // to display unit, lesson numbers
+	var unit_num = $('#unit-select-widget').prop('selectedIndex'); // to display unit, lesson numbers
         var newOptions = [];
         if (this.value != 'course_completion') {
           var lessons = lessonsObject[this.value];
@@ -397,15 +397,15 @@
            <select id="unit-select-widget"  class="unit-select">
               <option value="course_completion">Course</option>
               {% if units %}
-                {% set unit_num = 1 %} <!-- adding unit_num -->
+		{% set unit_num = 1 %}
                 {% for unit in units %}
                    {% if unit.type == 'U' %}
-                         <option value="{{ unit.unit_id }}"> Unit {{ unit_num }} {{  unit.title }}</option>
-                    {% set unit_num = unit_num + 1 %} 
+                         <option value="{{ unit.unit_id }}">Unit {{ unit_num }} {{ unit.title }}</option>
+		         {% set unit_num = unit_num + 1 %} 
                    {% endif %}
                 {% endfor %}
               {% endif %}
-         </select> 
+	    </select>
           </td>
           <td>
            <span class="hover help yui-wk-div" data-id="lessonselect"><label style="margin-left: 10px;"><b>Lessons: </b></label></span>
@@ -425,9 +425,9 @@
             <th id="course-unit-progress-heading" class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="course">Course Progress %</span></th>
             <th id="unit-progress-heading" class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="unit">Unit Progress %</span></th>
             <th class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="lesson">Lesson Progress</span></th>
-         {#   {% if has_scores %} #}
+            {% if has_scores %}
             <th class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="quiz">Question Progress</span></th>
-         {#   {% endif %} #}
+            {% endif %}
            </tr>
           </thead>
           <tbody>
@@ -439,7 +439,7 @@
               </a>
                </td>
              <td id="student-name-cell-{{loop.index}}">
-               {{ student.name }} 
+               {{ student.name }}
              </td>
              <td id="student-email-cell'{{loop.index}}">
                 {{ student.email }}
@@ -457,11 +457,11 @@
              &nbsp;
              <span id="student-lesson-status-holder-{{loop.index}}">N/A</span>
              </td>
-            {# {% if has_scores %} #}
+             {% if has_scores %}
                <td id="student-quizzes-cell-{{loop.index}}">
                  N/A
                </td>
-           {#  {% endif %} #}
+             {% endif %}
             </tr>
            {% endfor %}
           </tbody>
