@@ -413,10 +413,12 @@
        <select id="unit-select-widget" class="unit-select">
           <option value="course_completion">Course</option>
           {% if units %}
+	    {% set unit_num = 1 %} <!--  adding unit numbers -->
             {% for unit in units %}
                {% if unit.type == 'U' %}
-                  <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
-               {% endif %}
+                  <option value="{{ unit.unit_id }}"> Unit {{ unit_num }} {{ unit.title }}</option>
+                  {% set unit_num = unit_num + 1 %}
+	       {% endif %}
             {% endfor %}
           {% endif %}
         </select>
