@@ -160,13 +160,14 @@
     $(function() {
       $('.unit-select').change(function() {
         clear_questions_table(document.getElementById('questions-table'));
+	var unit_num = $('#unit-select-widget').prop('selectedIndex'); // to display unit, lesson numbers
         var newOptions = [];
         if (this.value != 'course_completion') {
           var lessons = lessonsObject[this.value];
           for (var i =0; i < lessons.length; i++) {
             newOptions.push({
               key: lessons[i].lesson_id,
-              value: lessons[i].title
+              value: unit_num + "." + (i+1) + " " + lessons[i].title  // display unit, lesson numbers with title
             });
           }
         } else {
@@ -306,7 +307,7 @@
          var row = table.insertRow(j++);
          row.insertCell(0).innerHTML = "<div style='color:blue;' >"  +
              "<a target='_blank' class='zmdi zmdi-eye'" +
-             " href=https://ram8647.appspot.com/mobileCSP/unit?unit=" + unit_id + "&lesson=" + lesson_id + "> " + description + "</a></div>";
+             " href=http://course.mobilecsp.org/mobilecsp/unit?unit=" + unit_id + "&lesson=" + lesson_id + "> " + description + "</a></div>";
          row.insertCell(1).innerHTML = "TBD";
          var k = 2;
          var choices = questions_dict[question]['choices'];
@@ -396,12 +397,15 @@
            <select id="unit-select-widget"  class="unit-select">
               <option value="course_completion">Course</option>
               {% if units %}
+		{% set unit_num = 1 %}
                 {% for unit in units %}
                    {% if unit.type == 'U' %}
-                         <option value="{{ unit.unit_id }}">{{ unit.title }}</option>
+                         <option value="{{ unit.unit_id }}">Unit {{ unit_num }} {{ unit.title }}</option>
+		         {% set unit_num = unit_num + 1 %} 
                    {% endif %}
                 {% endfor %}
               {% endif %}
+	    </select>
           </td>
           <td>
            <span class="hover help yui-wk-div" data-id="lessonselect"><label style="margin-left: 10px;"><b>Lessons: </b></label></span>
