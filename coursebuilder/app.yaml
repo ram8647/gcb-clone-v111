@@ -12,6 +12,7 @@
 # Use: ./scripts/deploy.sh mobilecsp-2017
 
 application:  mobilecsp-2017  # FIXME: Replace this with your application id
+#application:  mcsp-test  # Beryl's test server
 version: prod
 runtime: python27
 api_version: 1

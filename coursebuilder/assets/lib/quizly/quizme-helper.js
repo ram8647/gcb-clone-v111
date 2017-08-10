@@ -1011,7 +1011,10 @@ Blockly.Quizme.evaluateUserAnswer = function() {
     parent.document.getElementById('show_javascript').disabled = false;
     parent.document.getElementById('show_javascript').style.visibility = "visible";
   }
-  return result;
+  var wspace = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+  var wsStr = Blockly.Xml.domToText(wspace);
+
+  return [result, wsStr];  // Return an array with True/False and workspace blocks
 }
 
 /**

@@ -182,18 +182,21 @@ class StudentAnswersEntity(entities.BaseEntity):
         quid = None
         if 'quid' in data_json:          # Regular (not Quizly) question
             quid = data_json['quid']
+        workspace = None
+        if 'workspace' in data_json:     # Quizly workspace (student solution)
+            workspace = data_json['workspace']
         if not dict:
             dict = {}
             dict['email'] = user.email()
             dict['user_id'] = user.user_id()
-            dict['answers'] = cls.build_answers_dict(None, unit_id, lesson_id, instance_id, quid, answers, score, mytype)
+            dict['answers'] = cls.build_answers_dict(None, unit_id, lesson_id, instance_id, quid, answers, score, mytype, workspace)
         else:
             answers_dict = dict['answers']
-            dict['answers'] = cls.build_answers_dict(answers_dict, unit_id, lesson_id, instance_id, quid, answers, score, mytype)
+            dict['answers'] = cls.build_answers_dict(answers_dict, unit_id, lesson_id, instance_id, quid, answers, score, mytype, workspace)
         return dict
 
     @classmethod
-    def build_answers_dict(cls, answers_dict, unit_id, lesson_id, instance_id, quid, answers, score, type):
+    def build_answers_dict(cls, answers_dict, unit_id, lesson_id, instance_id, quid, answers, score, type, workspace):
         """ Builds the answers dict.
 
             Takes the form:
@@ -206,6 +209,7 @@ class StudentAnswersEntity(entities.BaseEntity):
         timestamp = int((datetime.datetime.now() - datetime.datetime(1970, 1, 1)).total_seconds())
         attempt = {'question_id': quid, 'answers': answers, 'score': score,
                    'attempts': 1, 'question_type': type, 'timestamp': timestamp,
+                   'workspace': workspace,
                    # Not sure whether the rest are needed
                    'weighted_score': 1, 'lesson_id': lesson_id, 'unit_id': unit_id, 'possible_points': 1,
                    'tallied': False, 'ever_completed': False
@@ -232,6 +236,7 @@ class StudentAnswersEntity(entities.BaseEntity):
                         answers_dict[unit_id][lesson_id][instance_id]['attempts'] += 1
                         answers_dict[unit_id][lesson_id][instance_id]['answers'] = answers
                         answers_dict[unit_id][lesson_id][instance_id]['score'] = score
+                        answers_dict[unit_id][lesson_id][instance_id]['workspace'] = workspace
                         if (score == 1):
                             answers_dict[unit_id][lesson_id][instance_id]['ever_completed'] = True
                     else:
