@@ -32,7 +32,7 @@ from tools import verify
 from modules.teacher.student_answers import StudentAnswersEntity
 
 # CUSTOMIZATION - Mobile CSP debug flag
-DEBUG = True
+DEBUG = False
 
 # Names of component tags that are tracked for progress calculations.
 TRACKABLE_COMPONENTS = [

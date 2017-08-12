@@ -35,7 +35,7 @@ from models.models import Student
 # In our module
 import messages
 
-GLOBAL_DEBUG = True
+GLOBAL_DEBUG = False
 
 class TeacherEntity(entities.BaseEntity):
 

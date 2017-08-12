@@ -63,30 +63,28 @@ class StudentAnswersEntity(entities.BaseEntity):
            very expensive query. So, we switched to an email-based key, which
            lets us retrieve a single record from the db with a key.get().
 
-           However, the datastore already had a couple of thousand records
+           However, the datastore in ram8647 already had a couple of thousand records
            in it and we were unable to revise it.  So this code works with
            both the legacy and new formats.
+           
+           In mobilecsp-2017, we ran into a similar problem with emails with mixed case being used as keys and causing problems, so this algorithm was adapted to create new entities with lowercase keys.
 
            Algorithm:
               First try to get the Entity using the student's key.  If
               that succeeds then proceed with updating the answers_dict.
               If that fails, then try getting the Entity using a query
               on the student's email (expensive).  If that succeeds,
-              create a new Entity as a copy of the existing one with
-              the email as its key.  If that fails, then this is the
-              occurrence for the student -- make a new Entity.
-
-          For some students this will leave 2 Entities with the
-          same email. However, only the entity with the email-based
-          key is updated.
-
-          We will eventually delete all numeric-based keys.
+               create a new Entity as a copy of the existing one with
+              the lowercase email as its key.  If that fails, then this is the occurrence for the student -- make a new Entity.
+           There are about 35 mixed case StudentAnswerEntities that we should delete once new entities are made.
+          
         """
         # Try to get the student's data by email key from datastore
-        email = user.email()
+        emailOrig = user.email()
+        email = emailOrig.lower()  # convert to lowercase!
         key = db.Key.from_path('StudentAnswersEntity', email)
         if GLOBAL_DEBUG:
-            logging.debug('***RAM*** email ' + email + ' key = ' + str(key))
+            logging.debug('***BAH*** email.lower() ' + email + ' key = ' + str(key) + ' emailOrig = ' + emailOrig)
         student = db.get(key)
 
         if student:
@@ -101,19 +99,20 @@ class StudentAnswersEntity(entities.BaseEntity):
             student = cls.get_student_by_email(email, user)
             if student:
                 if GLOBAL_DEBUG:
-                    logging.warning('***RAM*** updating for ' + email)
+                    logging.warning('***BAH*** record: updating student by email instead of key ' + email)
                 student.answers_dict = cls.update_answers_dict(student, data, user)
                 student.recorded_on = datetime.datetime.now()
                 student.put()
             else:
                 # No student with that email in Db -- create a new Entity
+                # Now using lowercase email! (BAH 8/12/17)
                 if GLOBAL_DEBUG:
                     logging.warning('***RAM*** creating new ' + email)
-                student = cls(key_name = email)
+                student = cls(key_name = email.lower())
                 dict = cls.update_answers_dict(None, data, user)
                 student.answers_dict = dict
                 student.user_id = user.user_id()
-                student.email = user.email()
+                student.email = email
                 student.put()
 
     @classmethod
@@ -129,12 +128,13 @@ class StudentAnswersEntity(entities.BaseEntity):
                 logging.warning('***RAM***  no hit for email ' + email)
             return None
         else:
-            # Here were are converting the student's answers entity
+            # Old: Here were are converting the student's answers entity
             # from using an integer key to using the email as key.
             # THis will make retrievals way more efficient.
+            # New: Converting to lowercase email key
             if GLOBAL_DEBUG:
-                logging.warning('***RAM*** creating new ' + email)
-            new_student = cls(key_name = email)
+                logging.warning('***BAH*** creating new entity with lowercase key ' + email)
+            new_student = cls(key_name = email.lower())
             new_student.answers_dict = student.answers_dict
             new_student.user_id = student.user_id
             new_student.email = email
@@ -187,7 +187,7 @@ class StudentAnswersEntity(entities.BaseEntity):
             workspace = data_json['workspace']
         if not dict:
             dict = {}
-            dict['email'] = user.email()
+            dict['email'] = user.email().lower() # lowercase!
             dict['user_id'] = user.user_id()
             dict['answers'] = cls.build_answers_dict(None, unit_id, lesson_id, instance_id, quid, answers, score, mytype, workspace)
         else:
@@ -256,7 +256,7 @@ class StudentAnswersEntity(entities.BaseEntity):
         if (hasattr(student, 'is_transient')):
             if student.is_transient:
                 return {}
-
+  
         email = student.email
         if GLOBAL_DEBUG:
             logging.warning('***RAM*** get answers dict for student, email = ' + email)
@@ -267,6 +267,14 @@ class StudentAnswersEntity(entities.BaseEntity):
         dict = {}
         if student_answers:
             dict = json.loads(student_answers.answers_dict)
+        else:
+            # NEW (BAH, 8/12/17) to deal with the mixed case email keys
+            # Try to query the db by email to get student (those are all lowercase now)
+            student_answers = cls.get_student_by_email(email, student)
+            if student_answers:
+                 dict = json.loads(student_answers.answers_dict)
+            if GLOBAL_DEBUG:
+                logging.debug('***BAH*** getting student by email instead of key ' + email +  str(student_answers))
         return dict
 
     def put(self):
