@@ -143,7 +143,7 @@ class StudentAnswersEntity(entities.BaseEntity):
     @classmethod
     def update_answers_dict(cls, student, data, user):
         if student:    # Student dict already exists
-            logging.debug('***RAM*** data = ' + str(data))
+            #logging.debug('***RAM*** data = ' + str(data))
             ## data_json = json.loads(data)
             dict = json.loads(student.answers_dict)
             dict = cls.build_dict(dict, data, user)

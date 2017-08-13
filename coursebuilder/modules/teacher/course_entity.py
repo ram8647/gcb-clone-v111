@@ -111,7 +111,6 @@ class SectionItemRESTHandler(utils.BaseRESTHandler):
         schema.add_property(schema_fields.SchemaField(
             'acadyr', 'Academic Year', 'string',
             select_data=[
-                 ('2016-17', '2016-17'),
                  ('2017-18', '2017-18'),
                  ('2018-19', '2018-19'),
                  ('2019-20', '2019-20')]))
@@ -170,12 +169,12 @@ class SectionItemRESTHandler(utils.BaseRESTHandler):
         entity_dict['students'] = emails
 
         if entity_dict['mode'] == 'Edit':
-            entity_dict['directions'] = "Edit a section: To add or delete students, add (or remove) their emails to (or from) the Class Roster."
+            entity_dict['directions'] = "Edit Class Roster: Add or delete students from your class roster by adding (or removing) the emails that they registered with, one per line or separated by commas. Please do not add more than 40 students per roster since this may lead to timeout errors."
         else:
-           entity_dict['name'] = "New section"
-           entity_dict['directions'] = "New section: Give the section a name and (optionally) a short description and pick an academic year. " + \
+            entity_dict['name'] = "New section"
+            entity_dict['directions'] = "New section: Give the section a name and (optionally) a short description and pick an academic year. " + \
                "To create a roster of students, you must use the exact email that the student is registered under. Put one email per line or " + \
-               "separate emails by commas."
+                "separate emails by commas."
 
         entity_dict.update(
             resources_display.LabelGroupsHelper.labels_to_field_data(

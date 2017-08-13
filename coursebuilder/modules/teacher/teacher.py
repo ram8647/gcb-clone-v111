@@ -42,13 +42,16 @@ from models import models
 from models import roles
 from models import transforms
 from models import utils as models_utils
+# add to get # of questions in each lesson  _get_activity_ids(unit1.unit_id, lesson11.lesson_id)
+from models.progress import ProgressStats
+
 from models.models import MemcacheManager
 from models.models import Student
 from models.models import EventEntity
 from modules.teacher import messages
 from modules.dashboard import dashboard
 from modules.oeditor import oeditor
-
+from models.models import QuestionDAO
 from google.appengine.ext import db
 from google.appengine.api import users
 
@@ -58,7 +61,7 @@ from course_entity import SectionItemRESTHandler
 from teacher_entity import TeacherEntity
 from teacher_entity import TeacherItemRESTHandler
 from teacher_entity import TeacherRights
-from student_activites import ActivityScoreParser
+#from student_activites import ActivityScoreParser
 from student_answers import StudentAnswersEntity
 
 GLOBAL_DEBUG = False
@@ -152,8 +155,8 @@ class TeacherHandlerMixin(object):
                     section['date'] = (
                         date - datetime.datetime(1970, 1, 1)).total_seconds() * 1000
 
-                if GLOBAL_DEBUG:
-                    logging.debug('***RAM*** format template section = ' + str(section))
+               # if GLOBAL_DEBUG:
+                #    logging.debug('***RAM*** format template section = ' + str(section))
 
                 # Add 'edit' and 'delete' actions to each section that will be displayed
 
@@ -369,7 +372,7 @@ class TeacherDashboardHandler(
 
         if GLOBAL_DEBUG:
             logging.debug('***RAM** get_edit_section rendering page')
-        self.template_value['main_content'] = form_html;
+        self.template_value['main_content'] = form_html
         self._render()
 
     def post_delete_section(self):
@@ -394,13 +397,45 @@ class TeacherDashboardHandler(
                 'xsrf_token': cgi.escape(
                     self.create_xsrf_token(xsrf_token_name)),
             }))
-
-    def get_lessons_for_roster(self, units, course):
+    
+    # param quizlys = course.get_components_with_name(unit.unit_id, lesson.lesson_id, 'quizly')
+    def get_quizlys_in_lesson(self, unit_id, lesson_id, quizlys): 
+        quizlys_for_lesson = {}
+        for q in quizlys:
+            instanceid = q['instanceid']
+            qname = q['quizname']
+            quizlys_for_lesson[instanceid] = {}
+            quizlys_for_lesson[instanceid]['quizname'] = qname
+        return quizlys_for_lesson
+    
+    # param questions = course.get_question_components(unit.unit_id, lesson.lesson_id)
+    def get_question_descriptions(self, unit_id, lesson_id, questions):
+        question_info = {}
+        for q in questions:
+            quid = q['quid']
+            qinfo = QuestionDAO.load(quid) 
+            question_info[quid] = {}
+            question_info[quid]['description'] =  qinfo.description
+        return question_info    
+    
+    # Creates a json file for the lessons as well as a total count of the number of correct answers in each lesson for student_roster.html
+    def get_lessons_and_corrects_for_roster(self, units, course):
         lessons = {}
+        questionTotals = {}
         for unit in units:
+            if (unit.unit_id == 176): #archived lessons unit
+                continue
             unit_lessons = course.get_lessons(unit.unit_id)
             unit_lessons_filtered = []
+            questionTotals[unit.unit_id] = {}
             for lesson in unit_lessons:
+                # questionTotals is the number of self-check questions + quizlys in each lesson   
+                quizlys = course.get_components_with_name(unit.unit_id, lesson.lesson_id, 'quizly')
+                questions = course.get_question_components(unit.unit_id, lesson.lesson_id)
+                questionTotals[unit.unit_id][lesson.lesson_id] =  len(questions) + len(quizlys)
+                #if GLOBAL_DEBUG:
+                 #   logging.debug('***BAH*** quizlys ' + str(quizlys))      
+                  
                 unit_lessons_filtered.append({
                     'title': lesson.title,
                     'unit_id': lesson.unit_id,
@@ -408,14 +443,62 @@ class TeacherDashboardHandler(
                 })
             lessons[unit.unit_id] = unit_lessons_filtered
 
-        # Convert to JSON
+        #save questionTotals # of questions in each lesson
+        self.template_value['questionTotals'] =  transforms.dumps(questionTotals,{})
+         # Convert lessons to JSON 
+        return transforms.dumps(lessons, {})
+     
+    # This is identical to the function above but gathers more info for the student dashboard like the names of the questions and quizlys.    
+    def get_lessons_questions_quizlys_for_student_dashboard(self, units, course):
+        lessons = {}
+        questionTotals = {}
+        quizlyDict = {}
+        questionsDict = {}
+        for unit in units:
+            if (unit.unit_id == 176): #archived lessons unit
+                continue       
+            unit_lessons = course.get_lessons(unit.unit_id)
+            unit_lessons_filtered = []
+            questionTotals[unit.unit_id] = {}
+            quizlyDict[unit.unit_id] = {}
+            questionsDict[unit.unit_id] = {}
+            for lesson in unit_lessons:
+                # questionTotals is the number of self-check questions + quizlys in each lesson   
+                quizlys = course.get_components_with_name(unit.unit_id, lesson.lesson_id, 'quizly')
+                questions = course.get_question_components(unit.unit_id, lesson.lesson_id)
+                questionTotals[unit.unit_id][lesson.lesson_id] =  len(questions) + len(quizlys)
+               # if GLOBAL_DEBUG:
+                #    logging.debug('***BAH*** quizlys ' + str(quizlys))
+                  
+                # save quizlys quiznames for student_dashboard.html
+                quizlyDict[unit.unit_id][lesson.lesson_id] = self.get_quizlys_in_lesson(unit.unit_id, lesson.lesson_id, quizlys) 
+                
+                # save question descriptions for student_dashboard.html
+                questionsDict[unit.unit_id][lesson.lesson_id] = self.get_question_descriptions(unit.unit_id, lesson.lesson_id, questions)
+                
+                    
+                unit_lessons_filtered.append({
+                    'title': lesson.title,
+                    'unit_id': lesson.unit_id,
+                    'lesson_id': lesson.lesson_id
+                })
+            lessons[unit.unit_id] = unit_lessons_filtered
+
+        #save questionTotals # of questions in each lesson
+        self.template_value['questionTotals'] =  transforms.dumps(questionTotals,{})
+         #save quizly names in each lesson
+        self.template_value['quizlys'] = transforms.dumps(quizlyDict,{})
+        #save question descriptions
+        self.template_value['questionDescriptions'] = transforms.dumps(questionsDict,{})
+
+         # Convert lessons to JSON 
         return transforms.dumps(lessons, {})
 
     def calculate_lessons_progress(self, lessons_progress):
         """ Returns a dict summarizing student progress on the lessons in each unit."""
 
-        if GLOBAL_DEBUG:
-            logging.debug('***RAM*** lessons_progress ' + str(lessons_progress))
+        #if GLOBAL_DEBUG:
+        #    logging.debug('***RAM*** lessons_progress ' + str(lessons_progress))
         lessons = {}
         total = 0
         for key in lessons_progress:
@@ -427,8 +510,8 @@ class TeacherDashboardHandler(
             lessons['progress'] = str(round(total / len(lessons) * 100, 2))
         else:
             lessons['progress'] = str(0)
-        if GLOBAL_DEBUG:
-            logging.debug('***RAM*** calc lessons = ' + str(lessons))
+        #if GLOBAL_DEBUG:
+          #  logging.debug('***RAM*** calc lessons = ' + str(lessons))
         return lessons
 
     def calculate_student_progress_data(self, student, course, tracker, units):
@@ -444,29 +527,30 @@ class TeacherDashboardHandler(
         # Progress on each unit in the course -- an unitid index dict
         unit_progress_raw = tracker.get_unit_percent_complete(student)
         unit_progress_data = {}
+        course_progress = 0
         for key in unit_progress_raw:
-            unit_progress_data[str(key)] = str(round(unit_progress_raw[key] * 100,2));
+            if course.is_valid_assessment_id(key): # skip assessments 
+                continue
+            if key == 176:  # skip archived unit 176
+                continue  
+            unit_progress_data[str(key)] = str(round(unit_progress_raw[key] * 100,2))
+            course_progress += unit_progress_raw[key]
+        course_progress = str(round(course_progress / len(unit_progress_data) * 100,2))   
         if GLOBAL_DEBUG:
-            logging.debug('***RAM*** unit_progress_data ' + str(unit_progress_data))
+            logging.debug('***BAH*** course_progress ' + str(course_progress) + ' for ' + str(len(unit_progress_data)) + ' units. unit_progress_data ' + str(unit_progress_data))
 
         # An object that summarizes student progress
         student_progress = tracker.get_or_create_progress(student)
         if GLOBAL_DEBUG:
             logging.debug('***RAM*** student_progress ' + str(student_progress))
 
-        # Overall progress in the course -- a per cent, rounded to 3 digits
-        course_progress = 0
-        for value in unit_progress_raw.values():
-            course_progress += value
-        course_progress = str(round(course_progress / len(unit_progress_data) * 100,2))
-
-        # Progress on each lesson in the coure -- a tuple-index dict:  dict[(unitid,lessonid)]
+        # Progress on each lesson in the course -- a tuple-index dict:  dict[(unitid,lessonid)]
         units_lessons_progress = {}
         for unit in units:
             if GLOBAL_DEBUG:
                 logging.debug('***RAM*** unit = ' + str(unit.unit_id))
             # Don't show assessments that are part of unit
-            if course.get_parent_unit(unit.unit_id):
+            if course.is_valid_assessment_id(unit.unit_id):
                 continue
             if unit.unit_id in unit_progress_raw:
                 lessons_progress = tracker.get_lesson_progress(student, unit.unit_id, student_progress)
@@ -475,52 +559,75 @@ class TeacherDashboardHandler(
                 units_lessons_progress[str(unit.unit_id)] = self.calculate_lessons_progress(lessons_progress)
         return {'unit_completion':unit_progress_data, 'course_progress':course_progress, 'lessons_progress': units_lessons_progress }
 
+    # BAH: Changing this to use StudentAnswersEntity instead of ActivityScoreParse which uses EventsEntity and mapreduce.
     def retrieve_student_scores_and_attempts(self, student_email, course):
         scores = {}
 
         student = Student.get_first_by_email(student_email)[0]  # returns a tuple
-
-        scores = ActivityScoreParser.get_activity_scores([student.user_id], course, True)
-        if GLOBAL_DEBUG:
-            logging.debug('***RAM*** get activity scores ' + str(scores))
-
+        # REPLACE WITH StudentAnswersEntity!!!
+        #scores = ActivityScoreParser.get_activity_scores([student.user_id], course, True)
+        # Getting answers_dict from StudentAnswersEntity
+        # { user_id: _, email:_, answers: {unit_id: {lesson_id: {instance_id: {<answer data>}}}}
+        answers_dict = StudentAnswersEntity.get_answers_dict_for_student(student)
+        # pull out just the answers and put in scores the way rest of the code expects
+        scores = { 'scores': answers_dict.get('answers',{}) }
+        
+        #if GLOBAL_DEBUG:
+         #   logging.debug('***BAH*** get scores from StudentAnswersEntity ' + str(scores))
         return scores
 
-    def calculate_performance_ratio(self, aggregate_scores, email):
-        if email not in aggregate_scores.keys():
-            return aggregate_scores
-        scores = aggregate_scores[email]
-        for unit in scores:
-            for lesson in scores[unit]:
-                n_questions = 0
+    # This function creates an answers dictionary that only has score, attempts, and numCorrect in lesson built from StudentAnswersEntity
+    #  {unit:{lesson:{question from StudentAnswersEntity
+    def filter_answers(self, answers, email, course):
+        filtered_answers = {}
+        for unit in answers:
+            filtered_answers[unit] = {}
+            for lesson in answers[unit]:
                 n_correct = 0
-                for quest in scores[unit][lesson]:
-                    n_questions += 1
-                    n_correct += scores[unit][lesson][quest]['score']
-                scores[unit][lesson]['ratio'] = str(n_correct) + "/" + str(n_questions)
-        return scores
+                filtered_answers[unit][lesson] = {}
+                for quest in answers[unit][lesson]:
+                    filtered_answers[unit][lesson][quest] = {}
+                    filtered_answers[unit][lesson][quest]['attempts'] = answers[unit][lesson][quest]['attempts']
+                    filtered_answers[unit][lesson][quest]['score'] = answers[unit][lesson][quest]['score']
+                    filtered_answers[unit][lesson][quest]['question_id'] = answers[unit][lesson][quest]['question_id']
+                    # calculate total questions correct in lesson
+                    n_correct += answers[unit][lesson][quest]['score']
+                
+                    # For quizly?
+                    #quizlys = course.get_components_with_name(int(unit), int(lesson), 'quizly')
+                    #if quest in quizlys:
+                     #   filtered_answers[unit][lesson][quest]['question_name'] = quizlys[quest]['question_name] 
+                    #if GLOBAL_DEBUG:
+                     #   logging.debug('***BAH*** quizlys ' + str(quizlys))
+                
+                answers[unit][lesson]['numCorrect'] = str(n_correct)
+                    
+                filtered_answers[unit][lesson]['numCorrect'] = str(n_correct)
+        return filtered_answers
 
     def create_student_table(self, email, course, tracker, units, get_scores=False):
         student_dict = {}
         student = Student.get_first_by_email(email)[0]  # returns a tuple
         if student:
             progress_dict = self.calculate_student_progress_data(student,course,tracker,units)
-            if get_scores:
-                scores = self.retrieve_student_scores_and_attempts(email, course)
-                student_dict['attempts'] = scores['attempts']
-#                    student_dict['scores'] = scores['scores']
-                student_dict['scores'] = self.calculate_performance_ratio(scores['scores'], email)
+            #if get_scores:
+            # Using StudentAnswersEntity
+            scores = self.retrieve_student_scores_and_attempts(email, course)
+            # this will have attempts, score, question_id, totalCorrect
+            student_dict['scores'] = self.filter_answers(scores['scores'], email, course)
             student_dict['name'] = student.name
             student_dict['email'] = student.email
             student_dict['progress_dict'] = progress_dict
             student_dict['has_scores'] = get_scores
+            #if GLOBAL_DEBUG:
+             #   logging.debug('***BAH*** student_dict:' + str(student_dict)
         return student_dict
 
     def create_student_data_table(self, course, section, tracker, units, student_email = None):
         """ Creates a lookup table containing all student progress data
             for every unit, lesson, and quiz.
         """
-        # If called from get_student_dashboad to get stats for a single student
+        # If called from get_student_dashboard to get stats for a single student
         if student_email:
             return self.create_student_table(student_email, course, tracker, units, get_scores=True)
 
@@ -559,16 +666,16 @@ class TeacherDashboardHandler(
         units = this_course.get_units()
         units_filtered = filter(lambda x: x.type == 'U', units) #filter out assessments
 
-        # And lessons
-        lessons = self.get_lessons_for_roster(units_filtered, this_course)
+        # And lessons and the number of correct answers in each lesson stored in a separate json in function
+        lessons = self.get_lessons_and_corrects_for_roster(units_filtered, this_course)
 
         # Get students and progress data for this section
         students = self.create_student_data_table(this_course, course_section, tracker, units_filtered)
 
         if GLOBAL_DEBUG:
             logging.debug('***RAM*** Units  : ' + str(units_filtered))
-            logging.debug('***RAM*** Lessons : ' + str(lessons))
-            logging.debug('***RAM*** Students : ' + str(students))
+            #logging.debug('***RAM*** Lessons : ' + str(lessons))
+            #logging.debug('***RAM*** Students : ' + str(students))
 
         user_email = users.get_current_user().email()
         self.template_value['resources_path'] = RESOURCES_PATH
@@ -597,10 +704,10 @@ class TeacherDashboardHandler(
 
         self.template_value['student_email'] = student_email
         self.template_value['units'] = units_filtered
-        self.template_value['lessons'] =  self.get_lessons_for_roster(units_filtered, this_course)
+        self.template_value['lessons'] = self.get_lessons_questions_quizlys_for_student_dashboard(units_filtered, this_course)
         student_dict = self.create_student_data_table(this_course, None, tracker, units_filtered, student_email)
-        if GLOBAL_DEBUG:
-            logging.debug('***RAM*** Student : ' + str(student_dict))
+        #if GLOBAL_DEBUG:
+         #   logging.debug('***RAM*** Student : ' + str(student_dict))
         self.template_value['student'] = student_dict
         self.template_value['studentJs'] = transforms.dumps(student_dict, {}) # for use with javascript
 
@@ -749,8 +856,8 @@ def record_tag_assessment(source, user, data):
 
     if source == 'tag-assessment':
         StudentAnswersEntity.record(user, data)
-        if GLOBAL_DEBUG:
-            logging.debug('***RAM*** data = ' + str(data))
+       # if GLOBAL_DEBUG:
+        #    logging.debug('***RAM*** data = ' + str(data))
 
 def notify_module_enabled():
     """Handles things after module has been enabled.

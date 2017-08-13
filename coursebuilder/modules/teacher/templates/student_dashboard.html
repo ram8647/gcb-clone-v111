@@ -161,7 +161,17 @@
   <script>
     var lessonsJson = '{{ lessons|safe }}';
     var lessonsObject = jQuery.parseJSON(lessonsJson);
-  </script>
+        // unitid: lessonid: numCorrect
+    var questionTotalsJson = '{{ questionTotals|safe }}';
+    var questionTotals = jQuery.parseJSON(questionTotalsJson);
+        // unitid: lessonid: instanceid: quizname
+    var quizlyJson = '{{ quizlys|safe }}';
+    var quizlys = jQuery.parseJSON(quizlyJson); 
+        // unitid: lessonid: quid: description
+    var questionDescriptionsJson = '{{ questionDescriptions|safe }}';
+    var questionDescriptions = jQuery.parseJSON(questionDescriptionsJson); 
+      
+</script>
 {% endif %}
 
 {% if student %}
@@ -175,23 +185,24 @@
 {% if student_email  %}
   <script>
     /*
-     * Creates an array of [question_id, attempts, score, type, desc, quizlyname] for each
-     *  question in the questions array. Non-quizly questions have name = ''.  These
+     * Creates an array of [question_id, attempts, score] for each
+     *  question in the questions array.  These
      *  data are used to render and array of links and hovers that enable the user
      *  to preview  each question, including Quizlys.
      *
-     * @param questions a dict of questions for this lesson
-     * @param attempts an array of the number of student attempts at a question
-     * @return An array of the form [id, attempts, score, type, desc, quizlyname] for each question.
+     * @param lessonAnswers is { totalCorrect:_, instance_id: { question_id: _, score: _, attempts: _}, instance_id: ...}
+     * @return An array of the form [id, attempts, score] for each question.
      */
-     function createQuestionsAttemptsArray(questions, attempts) {
+     function createQuestionsAttemptsArray(lessonAnswers) {
         var question_attempts = [];
-        for (var key in questions) {
-          if (key == 'ratio')
+        for (var key in lessonAnswers) {
+          if (key == 'numCorrect')
             continue;
-          var id = questions[key]['question_id'];
-          var score = questions[key]['weighted_score'];
-          var description = questions[key]['description'];
+          var instanceid = key;    
+          var id = lessonAnswers[key]['question_id'];
+          var score = lessonAnswers[key]['score'];
+          /* No description in StudentAnswersEntity
+          var description = lessonAnswers[key]['description'];
           var quizly_name = '';
           var desc = '';
           if (typeof(description) == 'object') {  // Quizly questions are described as dicts
@@ -201,11 +212,10 @@
             desc = description;                   // Non-quizly desc's are just strings
           }
           var type = questions[key]['question_type'];
-          if (id in attempts) {
-            question_attempts.push([id, attempts[id], score, type, desc, quizly_name]);
-          } else {
-            question_attempts.push([id, 0, score, type, desc, quizly_name]);
-          }
+          */
+          var attempts = lessonAnswers[key]['attempts'];
+          question_attempts.push([instanceid, id, attempts, score]);
+         
         }
       return question_attempts;
     }
@@ -220,20 +230,34 @@
      * @param scores a dict containing the student's score data
      * @return a array of the student's scores for the questions in given lessons
      */
-    function getQuestionScoresForStudentByLesson(studentId, unitId, lessonId, scores) {
+    function getQuestionScoresForStudentByLesson(unitId, lessonId, scores) {
       return (scores && scores[unitId] && scores[unitId][lessonId])
         ? scores[unitId][lessonId]
         : [];
     }
-
+     // NEW: uses quizlys json from teacher.py
+    function getQuizName(unit_id, lesson_id, instanceid) {
+        return (quizlys[unit_id] && quizlys[unit_id][lesson_id] &&
+                quizlys[unit_id][lesson_id][instanceid])
+                ? quizlys[unit_id][lesson_id][instanceid]['quizname'] 
+                : "";
+    }
+    // NEW: uses questionDescriptions json from teacher.py
+    function getQuestionDescription(unit_id, lesson_id, quid) {
+        return (questionDescriptions[unit_id] && questionDescriptions[unit_id][lesson_id] &&
+                questionDescriptions[unit_id][lesson_id][quid])
+                ? questionDescriptions[unit_id][lesson_id][quid]['description'] 
+                : "";
+    }
+      
     /*
      * Creates an n x 6 HTML table for a given lesson of n questions
      *  where each column consists of the question-id, the number
      *  of attempts, the student's score, and several descriptors for the
-     *  question, including type, description, and quizly_name.
+     *  question.
      *
      * @param lesson_id the lesson's id number
-     * @param attempts_array an array of the form [quid, attempts, score, ]
+     * @param attempts_array an array of the form [quid, attempts, score]
      * @return an HTML table displaying the students attempts and scores
      */
     function get_attempts_table(unit_id, lesson_id, attempts_array) {
@@ -247,25 +271,37 @@
       var cell = row.insertCell(0);
       cell.innerHTML = "Questions";
 
-      for (var i= 0; i < attempts_array.length; i++) {  // Queston Ids
+      for (var i= 0; i < attempts_array.length; i++) {  // Question Ids
         var cell = row.insertCell(i+1);
-        var id = attempts_array[i][0];
+        var instanceid =   attempts_array[i][0];
+        var id = attempts_array[i][1];
 
         // Make a unique class name for each clickable icon -- icons from material design, see link above
         var md_class_name = "zmdi zmdi-eye zmdi-" + id;
-        var type = attempts_array[i][3];
-        var desc = attempts_array[i][4];
-        var qname = attempts_array[i][5];
-
+        //var type = attempts_array[i][3];
+        //var desc = attempts_array[i][4];
+        //var qname = attempts_array[i][5];
+        // New: we have a quizly array now with quiznames in it
+        var qname = getQuizName(unit_id, lesson_id, instanceid);
+        //console.log(unit_id + lesson_id + instanceid + qname);
+        var description = "NA";
+        if (qname == null || qname == "")
+            description = " Self-check " + getQuestionDescription(unit_id, lesson_id,id);
+        else
+            description = " Quizly " + qname + " ";
+          
         // InnerHTML stores specifics about the question and supports a tooltip.
-        cell.innerHTML = "<div class='{0}' id='Q{1}' uid='{2}' \
-          lid='{3}' type='{4}' qname='{5}'> <div class='tooltip'> Q{6}<span class='tooltiptext'>{7}</span></div></div>"
-          .format(md_class_name, id, unit_id, lesson_id, type, qname, (i+1), desc);
+        //Old: cell.innerHTML = "<div class='{0}' id='Q{1}' uid='{2}'           lid='{3}' type='{4}' qname='{5}'> <div class='tooltip'> Q{6}<span class='tooltiptext'>{7}</span></div></div>"          .format(md_class_name, id, unit_id, lesson_id, type, qname, (i+1));
+          // New: 
+          cell.innerHTML = "<div class='{0}' id='Q{1}' uid='{2}'           lid='{3}' qname='{4}'> <div class='tooltip'> Q{5} <span class='tooltiptext'>{6}</span></div></div>".format(md_class_name, id, unit_id, lesson_id, qname,(i+1), description);
+          
 
         var el = document.getElementById("Q" + id);
         el.setAttribute('quid', id);
-        var type = el.getAttribute('type');
-        if (type != 'Quizly') {
+      //  var type = el.getAttribute('type');
+          // Show quizly or self-check
+          //console.log("Qid: " + id);
+        if (id != null) { // Quizlys have no ids
 	         el.onclick = function() {  // Open a modal iframe to display the question
              openModal();
              modal = document.getElementById('question-preview');
@@ -280,7 +316,7 @@
                {src: 'teacher?' + $.param(params)})).show();
            };
         } else {
-            el.onclick = function() {
+            el.onclick = function() { // display Quizly
               openModal();
               modal = document.getElementById('question-preview');
               modal.style.visibility = 'visible';
@@ -302,8 +338,8 @@
       cell.innerHTML = "Attempts";
       for (var i= 0; i < attempts_array.length; i++) {
         var cell = row.insertCell(i+1);
-        cell.innerHTML = attempts_array[i][1];
-        if (attempts_array[i][1] > 5) {
+        cell.innerHTML = attempts_array[i][2];
+        if (attempts_array[i][2] > 5) {
             cell.className = 'issue';
         }
       }
@@ -314,8 +350,8 @@
       cell.innerHTML = "Scores";
       for (var i = 0; i < attempts_array.length; i++) {
         var cell = row.insertCell(i+1);
-        cell.innerHTML = attempts_array[i][2];
-        if (attempts_array[i][2] != 1 && attempts_array[i][1] > 0) {
+        cell.innerHTML = attempts_array[i][3];
+        if (attempts_array[i][3] != 1 && attempts_array[i][2] > 0) {
             cell.className = 'issue';
         }
       }
@@ -329,7 +365,8 @@
      */
     function get_lesson_progress(unit_id, lesson_id) {
       return (studentJs['scores'][unit_id] && studentJs['scores'][unit_id][lesson_id])
-            ? studentJs['scores'][unit_id][lesson_id]['ratio']
+            ? studentJs['scores'][unit_id][lesson_id]['numCorrect'] + "/" +
+                questionTotals[unit_id][lesson_id]
             : 'N/A';
     }
 
@@ -354,8 +391,8 @@
       el.innerHTML = score_ratio;
 
        // If the lesson contains questions that have been attempted by the student, display them in a table.
-       var questions = getQuestionScoresForStudentByLesson(student_email, unit_id, lesson_id, studentJs['scores']);
-       var attempts_array  = createQuestionsAttemptsArray(questions, studentJs['attempts'][student_email]);
+       var lessonAnswers = getQuestionScoresForStudentByLesson(unit_id, lesson_id, studentJs['scores']);
+       var attempts_array  = createQuestionsAttemptsArray(lessonAnswers);
        if (attempts_array.length > 0) {
          get_attempts_table(unit_id, lesson_id, attempts_array);
        }
@@ -415,7 +452,8 @@
           {% if units %}
 	    {% set unit_num = 1 %} <!--  adding unit numbers -->
             {% for unit in units %}
-               {% if unit.type == 'U' %}
+            <!-- skip over archived lessons unit -->
+               {% if unit.type == 'U' and unit.unit_id != 176 %}
                   <option value="{{ unit.unit_id }}"> Unit {{ unit_num }} {{ unit.title }}</option>
                   {% set unit_num = unit_num + 1 %}
 	       {% endif %}

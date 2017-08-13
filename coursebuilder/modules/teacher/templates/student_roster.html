@@ -58,23 +58,7 @@
     $(window).bind("pageshow", function() {
       // Initialize drop-downs for unit and lesson.
       clear_questions_table(document.getElementById('questions-table'));
-      var unit_select = document.getElementById('unit-select-widget');
-      {% if units %}
-        var opt = document.createElement('option');
-        opt.value = 'course_completion';
-        opt.innerHTML = 'Course';
-        unit_select.appendChild(opt);
-        {% for unit in units %}
-          {% if unit.type == 'U' %}
-            opt.value = '{{ unit.unit_id }}';
-            opt.innerHTML = '{{ unit.title }}';
-            unit_select.appendChild(opt);
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-      unit_select.value = 'course_completion';
-      var lesson_select = document.getElementById('lesson-select-widget');
-      lesson_select.innerHTML = 'N/A';
+     
     });
   </script>
 
@@ -89,13 +73,15 @@
      */
     function get_quiz_ratio(student, unit, lesson) {
       var ratio = "N/A";
-      {% if has_scores %}
+    
       if (student['scores'][unit]) {
         if (student['scores'][unit][lesson]) {
-          ratio = student['scores'][unit][lesson]['ratio'];
+           // ratio = student['scores'][unit][lesson]['ratio'];
+            ratio = student['scores'][unit][lesson]['numCorrect'] + "/" +
+                questionTotals[unit][lesson];
         }
       }
-      {% endif %}
+
       return ratio;
     }
 
@@ -115,10 +101,10 @@
          var lesson_cell = document.getElementById('student-lesson-status-holder-' + (i+1));
          var lesson_icon = document.getElementById('student-lesson-icon-holder-' + (i+1));  // icon
          var quizzes_cell = document.getElementById('student-quizzes-cell-' + (i+1));
-         {% if has_scores %}
+        
            var quiz_ratio = get_quiz_ratio(student, unit_id,lesson_id);
            quizzes_cell.innerHTML = quiz_ratio;
-         {% endif %}
+     
          if (unit_id != 'course_completion') {
            var unit_completion = student['progress_dict']['unit_completion'][unit_id];
            unit_cell.innerHTML = unit_completion;
@@ -201,9 +187,10 @@
           var sel = document.getElementById('unit-select-widget');
           var unit_id = sel.options[sel.selectedIndex].value;
           update_section_stats(unit_id, this.value);
-          {% if has_scores %}
-            get_questions_table(unit_id, this.value);
-          {% endif %}
+              
+            // doesn't work because expecting 'choices' which is not in StudentAnswersEntity
+            //get_questions_table(unit_id, this.value);
+     
         }
       });
     });
@@ -336,6 +323,8 @@
   <script>
   var lessonsJson = '{{ lessons|safe }}';
   var lessonsObject = jQuery.parseJSON(lessonsJson);
+  var questionTotalsJson = '{{ questionTotals|safe }}';
+  var questionTotals = jQuery.parseJSON(questionTotalsJson);
   </script>
 {% endif %}
 {% if all_lessons %}
@@ -345,7 +334,7 @@
 {% endif %}
 {% if students %}
   <script>
-  var studentsArray = '{{ students_json | safe  }}';
+  var studentsArray = '{{ students_json | safe  }}'.replace(/\\/g, "\\\\");
   var studentsJs = jQuery.parseJSON(studentsArray);
   window.studentsJs = studentsJs;
   </script>
@@ -399,7 +388,8 @@
               {% if units %}
 		{% set unit_num = 1 %}
                 {% for unit in units %}
-                   {% if unit.type == 'U' %}
+               <!-- skip over archived lessons unit -->
+                   {% if unit.type == 'U' and unit.unit_id != 176 %}
                          <option value="{{ unit.unit_id }}">Unit {{ unit_num }} {{ unit.title }}</option>
 		         {% set unit_num = unit_num + 1 %} 
                    {% endif %}
@@ -425,9 +415,9 @@
             <th id="course-unit-progress-heading" class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="course">Course Progress %</span></th>
             <th id="unit-progress-heading" class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="unit">Unit Progress %</span></th>
             <th class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="lesson">Lesson Progress</span></th>
-            {% if has_scores %}
+         
             <th class="gcb-list__cell--icon"><span class="hover help yui-wk-div" data-id="quiz">Question Progress</span></th>
-            {% endif %}
+          
            </tr>
           </thead>
           <tbody>
@@ -457,11 +447,11 @@
              &nbsp;
              <span id="student-lesson-status-holder-{{loop.index}}">N/A</span>
              </td>
-             {% if has_scores %}
+            
                <td id="student-quizzes-cell-{{loop.index}}">
                  N/A
                </td>
-             {% endif %}
+     
             </tr>
            {% endfor %}
           </tbody>
