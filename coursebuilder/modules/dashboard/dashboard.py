@@ -198,7 +198,9 @@ class DashboardHandler(
 
         group = cls.root_menu_group.get_child(group_name)
         if group is None:
-            logging.critical('The group %s does not exist', group_name)
+            # BAH (8/18/17): changed critical to info for this unknown group analytics does not exist error distracting from all others.
+            #logging.critical('The group %s does not exist', group_name)
+            logging.info('The group %s does not exist', group_name)
             return
 
         if sub_group_name is None:
