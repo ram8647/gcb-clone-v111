@@ -72,7 +72,7 @@ class CourseSectionEntity(entities.BaseEntity):
         entity.description = description
         entity.is_active = is_active
         entity.date = datetime.datetime.now().date()
-        entity.teacher_email = users.get_current_user().email()
+        entity.teacher_email = users.get_current_user().email().lower()
         entity.students = ""
         return entity
 
@@ -169,11 +169,11 @@ class SectionItemRESTHandler(utils.BaseRESTHandler):
         entity_dict['students'] = emails
 
         if entity_dict['mode'] == 'Edit':
-            entity_dict['directions'] = "Edit Class Roster: Add or delete students from your class roster by adding (or removing) the emails that they registered with, one per line or separated by commas. Please do not add more than 40 students per roster since this may lead to timeout errors."
+            entity_dict['directions'] = "Edit Class Roster: Add or delete students from your class roster by adding (or removing) the lowercase emails that they registered with, one per line or separated by commas. Please do not add more than 40 students per roster since this may lead to timeout errors."
         else:
             entity_dict['name'] = "New section"
             entity_dict['directions'] = "New section: Give the section a name and (optionally) a short description and pick an academic year. " + \
-               "To create a roster of students, you must use the exact email that the student is registered under. Put one email per line or " + \
+               "To create a roster of students, you must use the exact lowercase email that the student is registered under. Put one email per line or " + \
                 "separate emails by commas."
 
         entity_dict.update(

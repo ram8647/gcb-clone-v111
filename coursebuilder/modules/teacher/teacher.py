@@ -160,7 +160,7 @@ class TeacherHandlerMixin(object):
 
                 # Add 'edit' and 'delete' actions to each section that will be displayed
 
-                if section['teacher_email'] == user_email and TeacherRights.can_edit_section(self):
+                if section['teacher_email'] == user_email.lower() and TeacherRights.can_edit_section(self):
                     section['edit_action'] = self.get_dashboard_action_url(
                         TeacherDashboardHandler.EDIT_SECTION_ACTION, key=section['key'])
 
@@ -310,7 +310,8 @@ class TeacherDashboardHandler(
             alerts.append('Access denied. Only registered teachers can use this feature.')
             disable = True
         else:
-            user_email = users.get_current_user().email()
+            # NEW: mixedCase bug - always make email lowercase
+            user_email = users.get_current_user().email().lower()
             if not self.is_registered_teacher(user_email):
                 alerts.append('Access denied. Please see a course admin.')
                 disable = True
