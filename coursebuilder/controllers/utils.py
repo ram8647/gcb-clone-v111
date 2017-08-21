@@ -1021,7 +1021,13 @@ class BaseHandler(CourseHandler):
             student = Student.get_enrolled_student_by_user(user)
             if student:
                 student.update_last_seen_on()
-
+                # ****MOBILE CSP CUSTOMIZATION ****
+                # Test if teacher in registration form
+                if ('teacher' in student.additional_fields):
+                    self.template_value['teacher'] = True
+                else:
+                    self.template_value['teacher'] = False
+            
             email = user.email()
             self.template_value['email_no_domain_name'] = (
                 email[:email.find('@')] if '@' in email else email)
@@ -1032,13 +1038,7 @@ class BaseHandler(CourseHandler):
             self.template_value['logoutUrl'] = users.create_logout_url(base_uri)
             self.template_value['transient_student'] = False
 
-            # ****MOBILE CSP CUSTOMIZATION ****
-            # Test if teacher in registration form
-            if ('teacher' in student.additional_fields):
-                 self.template_value['teacher'] = True
-            else:
-                self.template_value['teacher'] = False
-            
+           
             # configure page events
             self.template_value['can_record_student_events'] = (
                 self.can_record_student_events())
