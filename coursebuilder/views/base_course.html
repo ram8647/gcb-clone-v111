@@ -23,6 +23,19 @@
 
   <script src="/modules/oeditor/_static/js/butterbar.js"></script>
   <link rel="stylesheet" href="/modules/oeditor/_static/css/butterbar.css" media="screen" />
+
+<!-- MOBILE CSP CUSTOMIZATION - adding a hide answers button to self-checks for teachers -->
+{% if teacher %} <!-- defined in controllers/utils.py -->
+<script>
+ $(document).ready(function(){
+  $("#self-check").append("&nbsp; <button id='hideanswers'>Hide Answers</button>");
+  $("#hideanswers").click(function(){      
+             $("input:radio").attr("checked",false);
+             $("input:checkbox").attr("checked", false);
+  });
+ });
+</script>
+{% endif %}
 {% endblock %}
 
 {% block navbar %}
@@ -72,14 +85,16 @@
           </li>
         {% endfor %}
         <!-- CUSTOMIZATION - Teacher Dashboard 
-        Commented out to remove (Teachers) tab from student side -- access on teacher side tab or url /mobilecsp/teacher
+        Added Teacher Dashboard tab to the student side only for teachers who chose teacher on the registration form. Everyone has access on teacher side tab or url /mobilecsp/teacher -->
         {% if not transient_student %}
-          <li {% if navbar.teacher %}class='active'{% endif %}>
+          {%  if teacher %} <!-- Defined in controllers/utils.py -->
+          <li class='gcb-pull-right'>
              {# I18N: Navbar tab. #}
-             <a href="teacher">{{ gettext('(Teachers)') }}</a>
+             <a href="teacher">{{ gettext('Teacher Dashboard') }}</a>
           </li>
+          {% endif %}
         {% endif %}
-    -->
+   <!-- -->
         <!-- right-aligned links are in order -->
         {% for href, link in right_links %}
           <li class="gcb-pull-right">
