@@ -616,7 +616,8 @@ class TeacherDashboardHandler(
             scores = self.retrieve_student_scores_and_attempts(email, course)
             # this will have attempts, score, question_id, totalCorrect
             student_dict['scores'] = self.filter_answers(scores['scores'], email, course)
-            student_dict['name'] = student.name
+            # Removing ' from names that cause problems in roster display in Javascript
+            student_dict['name'] = str(student.name).replace("'","")
             student_dict['email'] = student.email
             student_dict['progress_dict'] = progress_dict
             student_dict['has_scores'] = get_scores
