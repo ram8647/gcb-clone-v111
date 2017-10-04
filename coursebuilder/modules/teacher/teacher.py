@@ -26,7 +26,7 @@ import datetime
 import os
 import urllib
 import logging
-
+import re
 import jinja2
 
 import appengine_config
@@ -616,8 +616,8 @@ class TeacherDashboardHandler(
             scores = self.retrieve_student_scores_and_attempts(email, course)
             # this will have attempts, score, question_id, totalCorrect
             student_dict['scores'] = self.filter_answers(scores['scores'], email, course)
-            # Removing ' from names that cause problems in roster display in Javascript
-            student_dict['name'] = str(student.name).replace("'","")
+            # Removing ' and everything but alpha and space from names that cause problems in roster display in Javascript
+            student_dict['name'] = re.sub('[^A-Za-z\ ]+', '', student.name) 
             student_dict['email'] = student.email
             student_dict['progress_dict'] = progress_dict
             student_dict['has_scores'] = get_scores
